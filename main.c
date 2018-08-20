@@ -304,6 +304,8 @@ int kt_parse_cart(kt_cartidge_t* cart, Uint8* data, int data_len)
         cart->flags |= KT_SGB;
     }
 
+    cart->type = data[0x147];
+
     if (data[0x148] <= 0x07) {
         cart->rom_len = 32000 << data[0x148];
     } else {
