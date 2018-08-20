@@ -2229,6 +2229,7 @@ void kt_rlca(kouta_t* kt, kt_op_t* instruction)
 
     kt->regs[KT_AF >> 4] = 0;
     kt_set_flag(kt, KT_CARRY, old_value & 0x80);
+    kt_set_flag(kt, KT_ZERO, !value);
     kt_set_a(kt, value);
 }
 
