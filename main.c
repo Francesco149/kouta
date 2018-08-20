@@ -1007,6 +1007,7 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
             return;
         case 0xFF42: kt->scy = value; return;
         case 0xFF43: kt->scx = value; return;
+        case 0xFF44: kt->ly = 0; return;
         case 0xFF45: kt->lyc = value; return;
         case 0xFF46: kt_dma(kt, (value << 8) & 0xFF00); return;
         case 0xFF47: kt->bgp = value; return;
