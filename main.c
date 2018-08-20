@@ -1821,6 +1821,24 @@ void kt_call_imm16(kouta_t* kt, kt_op_t* instruction)
     kt->pc = addr;
 }
 
+/* call (af & af_mask) == trigger_value,imm16 */
+void kt_call_cond_imm16(kouta_t* kt, int af_mask, int trigger_value,
+    kt_op_t* instruction)
+{
+    if ((kt->regs[KT_AF >> 4] & af_mask) != trigger_value) {
+        return;
+    }
+
+    kt->n_cycles += 12;
+    kt_call_imm16(kt, instruction);
+}
+
+/* call z imm16 */
+void kt_call_z_imm16(kouta_t* kt, kt_op_t* instruction)
+{
+    kt_call_cond_imm16(kt, KT_ZERO, KT_ZERO, instruction);
+}
+
 /* ret */
 void kt_ret(kouta_t* kt, kt_op_t* instruction)
 {
@@ -2356,7 +2374,7 @@ kt_op_t kt_op_table[512] = {
     { 0xC9, "RET", 0, 0, 0, 0, kt_ret, 1, 16 },
     { 0xCA, "JP Z", KT_IMM16, 0, 0, 0, kt_jp_z_imm16, 3, 12 },
     { 0xCB, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
-    { 0xCC, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xCC, "CALL Z", KT_IMM16, 0, 0, 0, kt_call_z_imm16, 3, 12 },
     { 0xCD, "CALL", KT_IMM16, 0, 0, 0, kt_call_imm16, 3, 24 },
     { 0xCE, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xCF, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
