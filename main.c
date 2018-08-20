@@ -366,6 +366,7 @@ enum kouta_mode
 };
 
 #define KT_MEM_ROM_ONLY 1
+#define KT_MEM_MBC1 2
 #define KT_MEM_MBC3 5
 #define KT_MEM_HAS_RAM 0x80000000
 
@@ -526,6 +527,7 @@ struct kouta
     int rom_bank;
     int ram_bank;
     int ram_enabled;
+    int bank_mode;
 
     Uint8 vram[0x2000];
     Uint8 wram[0x2000];
@@ -720,6 +722,11 @@ int kt_load_rom(kouta_t* kt, char *path)
     case KT_ROM_ONLY:
         kt->memory_model = KT_MEM_ROM_ONLY;
         break;
+    case KT_MBC1:
+    case KT_MBC1_RAM:
+    case KT_MBC1_RAM_BATTERY:
+        kt->memory_model = KT_MEM_MBC3;
+        break;
     case KT_MBC3_TIMER_BATTERY:
     case KT_MBC3_TIMER_RAM_BATTERY:
     case KT_MBC3:
@@ -734,6 +741,7 @@ int kt_load_rom(kouta_t* kt, char *path)
 
     switch (cart_info.type)
     {
+    case KT_MBC1_RAM:
     case KT_MBC3_TIMER_RAM_BATTERY:
     case KT_MBC3_RAM:
     case KT_MBC3_RAM_BATTERY:
@@ -912,27 +920,57 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
 
     if (addr < 0x8000)
     {
-        switch (kt->memory_model & 0x0F)
+        int model;
+
+        model = kt->memory_model & 0x0F;
+
+        switch (model)
         {
+        case KT_MEM_MBC1:
         case KT_MEM_MBC3:
             if (addr < 0x2000)
             {
-                if (value == 0x0A) {
+                if ((value & 0x0F) == 0x0A) {
                     kt->ram_enabled = 1;
                 } else if (value == 0x00) {
                     kt->ram_enabled = 0;
                 }
             }
 
-            else if (addr < 0x4000) {
-                kt->rom_bank = SDL_max(1, value);
+            else if (addr < 0x4000)
+            {
+                int low;
+
+                low = SDL_max(1, value);
+
+                if (model == KT_MEM_MBC1) {
+                    kt->rom_bank &= ~0x1F;
+                    low &= 0x1F;
+                } else {
+                    kt->rom_bank &= ~0x7F;
+                    low &= 0x7F;
+                }
+
+                kt->rom_bank |= low;
             }
 
-            else if (addr < 0x6000) {
-                kt->ram_bank = value;
+            else if (addr < 0x6000)
+            {
+                int high;
+
+                high = value & 3;
+
+                if (kt->bank_mode) {
+                    kt->ram_bank = high;
+                } else {
+                    kt->rom_bank &= 0x1F;
+                    kt->rom_bank |= high;
+                }
             }
 
-            else {
+            else if (model == KT_MEM_MBC1) {
+                kt->bank_mode = value & 1;
+            } else {
                 /* TODO: latch clock */
             }
             return;
