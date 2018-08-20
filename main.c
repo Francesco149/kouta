@@ -3336,8 +3336,8 @@ int* dmg_palette = dmg_grayscale_palette;
  */
 Uint8 tilemap[8 * 8 * 786];
 
-int objs_by_row[KT_HEIGHT * 40];
-int n_objs_by_row[KT_HEIGHT];
+int objs_by_row[(KT_HEIGHT + 16) * 40];
+int n_objs_by_row[KT_HEIGHT + 16];
 
 void print_usage(char* argv0)
 {
@@ -3711,10 +3711,10 @@ void update_obj_list()
         int x;
 
         data = &kt.oam[i * 4];
-        y = data[0] - 16;
-        x = data[1] - 16;
+        y = data[0];
+        x = data[1];
 
-        if (y <= 0 || y >= KT_HEIGHT || x <= 0 || x >= KT_WIDTH) {
+        if (y <= 0 || y >= KT_HEIGHT + 16 || x <= 0 || x >= KT_WIDTH + 8) {
             continue;
         }
 
