@@ -1339,7 +1339,7 @@ void kt_dec_reg16(kouta_t* kt, kt_op_t* instruction)
 }
 
 /* cp ***8 */
-Uint8 kt_cp(kouta_t* kt, Uint8 value)
+Uint8 kt_cp(kouta_t* kt, Uint16 value)
 {
     Uint8 a;
     Uint8 result;
@@ -1501,6 +1501,21 @@ void kt_sub_hl_ind(kouta_t* kt, kt_op_t* instruction)
     addr = kt->regs[KT_HL >> 4];
     value = kt_read(kt, addr);
     result = kt_cp(kt, value);
+    kt_set_a(kt, result);
+}
+
+/* sbc a,reg8 */
+void kt_sbc_a_reg8(kouta_t* kt, kt_op_t* instruction)
+{
+    Uint8 value;
+    Uint8 carry;
+    Uint8 result;
+
+    value = kt_get_reg(kt, instruction->src);
+    carry = kt->regs[KT_AF >> 4];
+    carry &= KT_CARRY;
+    carry >>= 4;
+    result = kt_cp(kt, (Uint16)(value + carry));
     kt_set_a(kt, result);
 }
 
@@ -2289,7 +2304,7 @@ kt_op_t kt_op_table[512] = {
     { 0x95, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0x96, "SUB", KT_REG_IND, KT_HL, 0, 0, kt_sub_hl_ind, 1, 8 },
     { 0x97, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
-    { 0x98, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0x98, "SBC", KT_REG, KT_A, KT_REG, KT_B, kt_sbc_a_reg8, 1, 4 },
     { 0x99, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0x9A, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0x9B, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
