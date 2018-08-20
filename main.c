@@ -2065,12 +2065,21 @@ void kt_res_hl_ind(kouta_t* kt, kt_op_t* instruction)
 void kt_rl_reg8(kouta_t* kt, kt_op_t* instruction)
 {
     Uint8 value;
+    Uint8 old;
 
     value = (Uint8)kt_get_reg(kt, instruction->dst);
+    old = value;
 
     kt->regs[KT_AF >> 4] &= 0xFF00;
-    kt_set_flag(kt, KT_CARRY, value & 0x80);
     value <<= 1;
+
+    if (kt->regs[KT_AF >> 4] & KT_CARRY) {
+        value |= 1;
+    } else {
+        value &= ~1;
+    }
+
+    kt_set_flag(kt, KT_CARRY, old & 0x80);
     kt_set_flag(kt, KT_ZERO, !value);
     kt_set_reg(kt, instruction->dst, value);
 }
@@ -2079,12 +2088,22 @@ void kt_rl_reg8(kouta_t* kt, kt_op_t* instruction)
 void kt_rr_reg8(kouta_t* kt, kt_op_t* instruction)
 {
     Uint8 value;
+    Uint8 old;
 
     value = (Uint8)kt_get_reg(kt, instruction->dst);
+    old = value;
 
     kt->regs[KT_AF >> 4] &= 0xFF00;
-    kt_set_flag(kt, KT_CARRY, value & 1);
+
     value >>= 1;
+
+    if (kt->regs[KT_AF >> 4] & KT_CARRY) {
+        value |= 0x80;
+    } else {
+        value &= ~0x80;
+    }
+
+    kt_set_flag(kt, KT_CARRY, old & 1);
     kt_set_flag(kt, KT_ZERO, !value);
     kt_set_reg(kt, instruction->dst, value);
 }
