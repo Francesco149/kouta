@@ -2254,7 +2254,7 @@ void kt_sla_reg8(kouta_t* kt, kt_op_t* instruction)
     value <<= 1;
     value &= 0xFE;
 
-    kt->regs[KT_AF >> 4] = 0;
+    kt->regs[KT_AF >> 4] &= 0xFF00;
     kt_set_flag(kt, KT_ZERO, !value);
     kt_set_flag(kt, KT_CARRY, old_value & 0x80);
     kt_set_reg(kt, instruction->dst, value);
@@ -2271,7 +2271,7 @@ void kt_srl_reg8(kouta_t* kt, kt_op_t* instruction)
     value >>= 1;
     value &= 0x7F;
 
-    kt->regs[KT_AF >> 4] = 0;
+    kt->regs[KT_AF >> 4] &= 0xFF00;
     kt_set_flag(kt, KT_ZERO, !value);
     kt_set_flag(kt, KT_CARRY, old_value & 1);
     kt_set_reg(kt, instruction->dst, value);
@@ -2288,7 +2288,7 @@ void kt_sra_reg8(kouta_t* kt, kt_op_t* instruction)
     value >>= 1;
     value |= old_value & 0x80;
 
-    kt->regs[KT_AF >> 4] = 0;
+    kt->regs[KT_AF >> 4] &= 0xFF00;
     kt_set_flag(kt, KT_ZERO, !value);
     kt_set_flag(kt, KT_CARRY, old_value & 1);
     kt_set_reg(kt, instruction->dst, value);
@@ -2306,7 +2306,7 @@ void kt_swap_reg8(kouta_t* kt, kt_op_t* instruction)
         ((value >> 4) & 0x0F)
     );
 
-    kt->regs[KT_AF >> 4] = 0;
+    kt->regs[KT_AF >> 4] &= 0xFF00;
     kt_set_flag(kt, KT_ZERO, !value);
     kt_set_reg(kt, instruction->dst, value);
 }
