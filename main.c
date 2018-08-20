@@ -1286,6 +1286,13 @@ void kt_ld_hl_sprel8(kouta_t* kt, kt_op_t* instruction)
     kt->regs[KT_HL >> 4] = result;
 }
 
+/* ld sp,hl */
+void kt_ld_sp_hl(kouta_t* kt, kt_op_t* instruction)
+{
+    (void)instruction;
+    kt->regs[KT_SP >> 4] = kt->regs[KT_HL >> 4];
+}
+
 /* inc *8 */
 Uint8 kt_inc8(kouta_t* kt, Uint8 value)
 {
@@ -2450,7 +2457,7 @@ kt_op_t kt_op_table[512] = {
     { 0xF6, "OR", KT_IMM8, 0, 0, 0, kt_or_imm8, 2, 8 },
     { 0xF7, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xF8, "LD", KT_REG, KT_HL, KT_SPREL8, 0, kt_ld_hl_sprel8, 2, 12 },
-    { 0xF9, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xF9, "LD", KT_REG, KT_SP, KT_REG, KT_HL, kt_ld_sp_hl, 1, 8 },
     { 0xFA, "LD", KT_REG, KT_A, KT_IMM16_IND, 0,
         kt_ld_reg8_imm16_ind, 3, 16 },
     { 0xFB, "EI", 0, 0, 0, 0, kt_ei, 1, 4 },
