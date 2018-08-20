@@ -3507,7 +3507,7 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
 {
     int x, y;
 
-    if (l + 8 < 0) {
+    if (l + 8 <= 0) {
         return;
     }
 
@@ -3515,7 +3515,7 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
         return;
     }
 
-    if (t + 8 < 0) {
+    if (t + 8 <= 0) {
         return;
     }
 
