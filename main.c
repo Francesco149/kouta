@@ -3400,7 +3400,7 @@ void update_obj_list()
     /* sort every row by x descending and take up to 10 leftmost objs */
     for (row = 0; row < KT_HEIGHT; ++row)
     {
-        qsort(&objs_by_row[row * 40], n_objs_by_row[row],
+        SDL_qsort(&objs_by_row[row * 40], n_objs_by_row[row],
             sizeof(int), compar_objs);
     }
 }
