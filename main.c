@@ -3397,7 +3397,12 @@ void update_obj_list()
         objs_by_row[y * 40 + n_objs_by_row[y]++] = i;
     }
 
-    /* sort every row by x descending and take up to 10 leftmost objs */
+    /*
+     * sort every row by x descending and take up to 10 objs
+     * this is required to give priority to the leftmost objects
+     * (objects with lower x appear above ones with higher x)
+     */
+
     for (row = 0; row < KT_HEIGHT; ++row)
     {
         SDL_qsort(&objs_by_row[row * 40], n_objs_by_row[row],
