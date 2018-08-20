@@ -1425,7 +1425,7 @@ void kt_or_reg8(kouta_t* kt, kt_op_t* instruction)
     kt_or8(kt, value);
 }
 
-/* or immt8 */
+/* or imm8 */
 void kt_or_imm8(kouta_t* kt, kt_op_t* instruction)
 {
     Uint8 value;
