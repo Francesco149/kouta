@@ -2252,6 +2252,7 @@ void kt_sla_reg8(kouta_t* kt, kt_op_t* instruction)
     value = kt_get_reg(kt, instruction->dst);
     old_value = value;
     value <<= 1;
+    value &= 0xFE;
 
     kt->regs[KT_AF >> 4] = 0;
     kt_set_flag(kt, KT_ZERO, !value);
@@ -2268,6 +2269,7 @@ void kt_srl_reg8(kouta_t* kt, kt_op_t* instruction)
     value = kt_get_reg(kt, instruction->dst);
     old_value = value;
     value >>= 1;
+    value &= 0x7F;
 
     kt->regs[KT_AF >> 4] = 0;
     kt_set_flag(kt, KT_ZERO, !value);
