@@ -1686,7 +1686,7 @@ void kt_cpl(kouta_t* kt, kt_op_t* instruction)
 void kt_rst_lomem(kouta_t* kt, kt_op_t* instruction)
 {
     /*
-     * manual says it pushes the "preset address", but in reality the cpu
+     * manual says it pushes the "present address", but in reality the cpu
      * already fetched the instruction meaning that we push the addr
      * AFTER the rst instruction
      */
