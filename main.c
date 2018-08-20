@@ -1035,11 +1035,11 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
     log_dump("02X", value);
 }
 
-int kt_read2(kouta_t* kt, int addr)
+Uint16 kt_read2(kouta_t* kt, int addr)
 {
-    return (
-        (kt_read(kt, addr + 0) << 0) |
-        (kt_read(kt, addr + 1) << 8)
+    return (Uint16)(
+        ((kt_read(kt, addr + 0) << 0) & 0x00FF) |
+        ((kt_read(kt, addr + 1) << 8) & 0xFF00)
     );
 }
 
