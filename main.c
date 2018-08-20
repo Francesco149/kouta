@@ -1260,6 +1260,32 @@ void kt_ld_imm16_ind_sp(kouta_t* kt, kt_op_t* instruction)
     kt_write2(kt, addr, kt->regs[KT_SP >> 4]);
 }
 
+/* ld hl,sp+sprel8 */
+void kt_ld_hl_sprel8(kouta_t* kt, kt_op_t* instruction)
+{
+    Sint8 rel8;
+    Uint16 sp;
+    Uint16 result;
+
+    (void)instruction;
+
+    sp = kt->regs[KT_SP >> 4];
+    rel8 = (Sint8)kt_read(kt, kt->pc + 1);
+    result = (Uint16)(sp + rel8);
+
+    kt->regs[KT_AF >> 4] = 0;
+    kt_set_flag(kt, KT_HCARRY, (sp ^ rel8 ^ result) & 0x10);
+    kt_set_flag(kt, KT_CARRY, result < sp);
+    kt_set_flag(kt, KT_CARRY, (result & 0xFF) < (sp & 0xFF));
+
+    /*
+     * TODO: are we sure it's supposed to set C even if the lower byte
+     * carries?
+     */
+
+    kt->regs[KT_HL >> 4] = result;
+}
+
 /* inc *8 */
 Uint8 kt_inc8(kouta_t* kt, Uint8 value)
 {
@@ -2145,6 +2171,7 @@ enum kt_addressing_mode
     KT_LOMEM,
     KT_HIMEM8,
     KT_HIMEM8_IND,
+    KT_SPREL8,
     KT_IMM16,
     KT_IMM16_IND,
     KT_BIT,
@@ -2422,7 +2449,7 @@ kt_op_t kt_op_table[512] = {
     { 0xF5, "PUSH", KT_REG, KT_AF, 0, 0, kt_push_reg16, 1, 16 },
     { 0xF6, "OR", KT_IMM8, 0, 0, 0, kt_or_imm8, 2, 8 },
     { 0xF7, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
-    { 0xF8, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xF8, "LD", KT_REG, KT_HL, KT_SPREL8, 0, kt_ld_hl_sprel8, 2, 12 },
     { 0xF9, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xFA, "LD", KT_REG, KT_A, KT_IMM16_IND, 0,
         kt_ld_reg8_imm16_ind, 3, 16 },
@@ -2719,6 +2746,7 @@ int kt_print_operand(char* buf, int buf_len, kouta_t* kt, char* prefix,
     char* p;
     char* end;
     int opsize;
+    int offset;
 
     if (kt_read(kt, kt->pc) == 0xCB) {
         opsize = 2;
@@ -2768,6 +2796,11 @@ int kt_print_operand(char* buf, int buf_len, kouta_t* kt, char* prefix,
     case KT_HIMEM8_IND:
         p += sys_snprintf(p, end - p, "(%04X)",
             0xFF00 + kt_read(kt, kt->pc + opsize));
+        break;
+    case KT_SPREL8:
+        offset = (Sint8)kt_read(kt, kt->pc + 1);
+        p += sys_snprintf(p, end - p, "SP%c%02X",
+            offset < 0 ? '-' : '+', offset < 0 ? -offset : offset);
         break;
     case KT_IMM16:
         p += sys_snprintf(p, end - p, "%04X",
