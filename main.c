@@ -365,6 +365,10 @@ enum kouta_mode
     KT_LAST_MODE
 };
 
+#define KT_MEM_ROM_ONLY 1
+#define KT_MEM_MBC3 5
+#define KT_MEM_HAS_RAM 0x80000000
+
 #define KT_LO 0x01
 #define KT_HI 0x02
 
@@ -518,10 +522,15 @@ struct kouta
 
     Uint8* cart;
     int cart_len;
+    int memory_model;
+    int rom_bank;
+    int ram_bank;
+    int ram_enabled;
 
     Uint8 vram[0x2000];
     Uint8 wram[0x2000];
     Uint8 hram[0x7F];
+    Uint8 ram[0x8000];
 
     int div_cycles;
     int tima_cycles;
@@ -629,6 +638,7 @@ void kt_reset(kouta_t* kt)
     kt->cycles_per_second = KT_DMG_FREQUENCY;
     kt->stat = KT_STAT_READING_OAM;
     kt->ime = 1;
+    kt->rom_bank = 1;
 }
 
 void kt_write(kouta_t* kt, int addr, Uint8 value);
@@ -692,11 +702,6 @@ int kt_load_rom(kouta_t* kt, char *path)
 
     kt_print_cart(&cart_info);
 
-    if (cart_info.type != KT_ROM_ONLY) {
-        log_puts("this memory model not yet implemented");
-        return 0;
-    }
-
     if (cart_info.flags & KT_GBC_ONLY) {
         log_puts("gbc mode not yet implemented");
         return 0;
@@ -708,6 +713,32 @@ int kt_load_rom(kouta_t* kt, char *path)
         log_puts("header checksum doesn't match");
         log_dump("02X", checksum);
         return 0;
+    }
+
+    switch (cart_info.type)
+    {
+    case KT_ROM_ONLY:
+        kt->memory_model = KT_MEM_ROM_ONLY;
+        break;
+    case KT_MBC3_TIMER_BATTERY:
+    case KT_MBC3_TIMER_RAM_BATTERY:
+    case KT_MBC3:
+    case KT_MBC3_RAM:
+    case KT_MBC3_RAM_BATTERY:
+        kt->memory_model = KT_MEM_MBC3;
+        break;
+    default:
+        log_puts("unimplemented memory model");
+        return 0;
+    }
+
+    switch (cart_info.type)
+    {
+    case KT_MBC3_TIMER_RAM_BATTERY:
+    case KT_MBC3_RAM:
+    case KT_MBC3_RAM_BATTERY:
+        kt->memory_model |= KT_MEM_HAS_RAM;
+        break;
     }
 
     /* bypass checksum */
@@ -740,16 +771,37 @@ Uint8 kt_read(kouta_t* kt, int addr)
         return kt_dmg_rom[addr];
     }
 
-    else if (addr < 0x8000) {
+    else if (addr < 0x4000) {
         return kt->cart[addr];
+    }
+
+    else if (addr < 0x8000) {
+        return kt->cart[kt->rom_bank * 0x4000 + (addr & 0x3FFF)];
     }
 
     else if (addr < 0xA000) {
         return kt->vram[addr & 0x1FFF];
     }
 
-    else if (addr < 0xC000) {
-        log_puts("TODO: read switchable ram banks");
+    else if (addr < 0xC000)
+    {
+        if (kt->ram_bank < 4)
+        {
+            if (!kt->ram_enabled) {
+                log_puts("tried to write disabled ram");
+            } else {
+                return kt->ram[kt->ram_bank * 0x2000 + (addr & 0x1FFF)];
+            }
+        }
+
+        else if (kt->ram_bank >= 0x08 || kt->ram_bank <= 0x0C) {
+            /* TODO: rtc */
+            return 0;
+        }
+
+        else {
+            log_puts("tried to read with invalid ram bank selected");
+        }
     }
 
     else if (addr < 0xFE00) {
@@ -852,13 +904,36 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
 {
     addr &= 0xFFFF;
 
-    if (addr < 0x100) {
-        log_puts("tried to write to bootrom");
-        return;
-    }
+    if (addr < 0x8000)
+    {
+        switch (kt->memory_model & 0x0F)
+        {
+        case KT_MEM_MBC3:
+            if (addr < 0x2000)
+            {
+                if (value == 0x0A) {
+                    kt->ram_enabled = 1;
+                } else if (value == 0x00) {
+                    kt->ram_enabled = 0;
+                }
+            }
 
-    else if (addr < 0x8000) {
-        log_puts("tried to write to rom");
+            else if (addr < 0x4000) {
+                kt->rom_bank = SDL_max(1, value);
+            }
+
+            else if (addr < 0x6000) {
+                kt->ram_bank = value;
+            }
+
+            else {
+                /* TODO: latch clock */
+            }
+            return;
+
+        default:
+            log_puts("tried to write to rom");
+        }
     }
 
     else if (addr < 0xA000) {
@@ -866,8 +941,19 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
         return;
     }
 
-    else if (addr < 0xC000) {
-        log_puts("TODO: switchable ram banks");
+    else if (addr < 0xC000)
+    {
+        if (kt->ram_bank < 4) {
+            kt->ram[kt->ram_bank * 0x2000 + (addr & 0x1FFF)] = value;
+            return;
+        }
+
+        if (kt->ram_bank >= 0x08 || kt->ram_bank <= 0x0C) {
+            /* TODO: rtc */
+            return;
+        }
+
+        log_puts("tried to write with invalid ram bank selected");
     }
 
     else if (addr < 0xFE00) {
