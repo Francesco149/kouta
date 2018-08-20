@@ -1599,6 +1599,16 @@ void kt_or_imm8(kouta_t* kt, kt_op_t* instruction)
     kt_or8(kt, value);
 }
 
+/* or (hl) */
+void kt_or_hl_ind(kouta_t* kt, kt_op_t* instruction)
+{
+    Uint8 value;
+
+    (void)instruction;
+    value = kt_read(kt, kt->regs[KT_HL >> 4]);
+    kt_or8(kt, value);
+}
+
 /* xor *8 */
 void kt_xor8(kouta_t* kt, Uint8 value)
 {
@@ -2405,7 +2415,7 @@ kt_op_t kt_op_table[512] = {
     { 0xB3, "OR", KT_REG, KT_E, 0, 0, kt_or_reg8, 1, 4 },
     { 0xB4, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xB5, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
-    { 0xB6, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xB6, "OR", KT_REG_IND, KT_HL, 0, 0, kt_or_hl_ind, 1, 8 },
     { 0xB7, "OR", KT_REG, KT_A, 0, 0, kt_or_reg8, 1, 4 },
     { 0xB8, "CP", KT_REG, KT_B, 0, 0, kt_cp_reg8, 1, 4 },
     { 0xB9, "CP", KT_REG, KT_C, 0, 0, kt_cp_reg8, 1, 4 },
