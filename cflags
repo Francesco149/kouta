@@ -1,0 +1,43 @@
+#!/bin/sh
+
+if [ ! which sdl2-config >/dev/null 2>&1 ]; then
+    >&2 echo "can't find sdl2-config, are you sure you have SDL2?"
+fi
+
+cflags="`sdl2-config --cflags`"
+cflags="$cflags -std=c89 -pedantic"
+cflags="$cflags -O3"
+cflags="$cflags -Wall -Wextra -Wno-unused-value -Wunused -Werror"
+cflags="$cflags -ffunction-sections -fdata-sections"
+cflags="$cflags -g0 -fno-unwind-tables -s"
+cflags="$cflags -fno-asynchronous-unwind-tables"
+cflags="$cflags -Wl,--gc-sections"
+
+ldflags="-lGL -lGLU `sdl2-config --libs`"
+
+cflags="$cflags $CFLAGS"
+ldflags="$ldflags $LDFLAGS"
+
+case `uname` in
+Darwin|FreeBSD) cc="${CC:-clang}" ;;
+*) cc="${CC:-gcc}" ;;
+esac
+
+which $cc >/dev/null 2>&1 || cc=gcc
+which $cc >/dev/null 2>&1 || cc=clang
+
+if [ ! which $cc >/dev/null 2>&1 ]; then
+    >&2 echo "can't find any compiler, please specify CC"
+fi
+
+uname -a > flags.log
+echo $cc >> flags.log
+echo $cflags >> flags.log
+echo $ldflags >> flags.log
+$cc --version >> flags.log
+$cc -dumpmachine >> flags.log
+
+export cflags="$cflags"
+export ldflags="$ldflags"
+export cc="$cc"
+

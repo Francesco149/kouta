@@ -1,0 +1,8 @@
+#!/bin/sh
+
+dir="`dirname "$0"`"
+. "$dir"/cflags
+abspath=`realpath "$dir"`
+exename=`basename "$abspath"`
+$cc $cflags "$@" main.c $ldflags -o $exename
+
