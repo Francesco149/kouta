@@ -3235,7 +3235,7 @@ int kt_tick(kouta_t* kt)
         kt->pc += instruction->size;
         kt->n_cycles += instruction->n_cycles;
 
-        if (!instruction->n_cycles || !instruction->size) {
+        if (instruction->n_cycles <= 0 || instruction->size <= 0) {
             log_puts("*** FIX YOUR CODE IDIOT ***");
             log_dump("d", instruction->n_cycles);
             log_dump("d", instruction->size);
