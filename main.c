@@ -2644,7 +2644,7 @@ kt_op_t kt_op_table[512] = {
     { 0xAB, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
     { 0xAC, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
     { 0xAD, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
-    { 0xAE, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
+    { 0xAE, "RES", KT_REG_IND, KT_HL, KT_BIT, 5, kt_res_hl_ind, 2, 16 },
     { 0xAF, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
     { 0xB0, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
     { 0xB1, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
