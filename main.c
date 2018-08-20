@@ -3583,7 +3583,7 @@ void render_window(int* pix)
     }
 }
 
-void render_obj(int* pix, int n, int match_flags)
+void render_obj(int* pix, int n, int flags_mask, int flags_match)
 {
     Uint8* data;
     int x, y;
@@ -3596,7 +3596,7 @@ void render_obj(int* pix, int n, int match_flags)
     tile_index = data[2];
     flags = data[3];
 
-    if ((flags & match_flags) != match_flags) {
+    if ((flags & flags_mask) != flags_match) {
         return;
     }
 
@@ -3683,15 +3683,17 @@ void update_obj_list()
     }
 }
 
-void render_objs(int* pix, int match_flags)
+void render_objs(int* pix, int flags_mask, int flags_match)
 {
     int i;
     int row;
 
     for (row = 0; row < KT_HEIGHT; ++row)
     {
-        for (i = 0; i < SDL_max(10, n_objs_by_row[row]); ++i) {
-            render_obj(pix, objs_by_row[row * 40 + i], match_flags);
+        for (i = 0; i < SDL_max(10, n_objs_by_row[row]); ++i)
+        {
+            render_obj(pix, objs_by_row[row * 40 + i], flags_mask,
+                flags_match);
         }
     }
 }
@@ -3705,10 +3707,10 @@ void render()
 
     r_begin(&pix);
     r_clear(pix, dmg_palette[bgp(0)]);
-    render_objs(pix, KT_OBJ_BEHIND);
+    render_objs(pix, KT_OBJ_BEHIND, KT_OBJ_BEHIND);
     render_background(pix);
     render_window(pix);
-    render_objs(pix, 0);
+    render_objs(pix, KT_OBJ_BEHIND, 0);
     r_end();
 
     ++frames_per_second;
