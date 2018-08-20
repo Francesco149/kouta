@@ -1371,6 +1371,14 @@ void kt_dec_reg16(kouta_t* kt, kt_op_t* instruction)
     --kt->regs[instruction->dst >> 4];
 }
 
+/* scf */
+void kt_scf(kouta_t* kt, kt_op_t* instruction)
+{
+    (void)instruction;
+    kt->regs[KT_AF >> 4] |= KT_CARRY;
+    kt->regs[KT_AF >> 4] &= ~(KT_SUBTRACT | KT_HCARRY);
+}
+
 /* cp ***8 */
 Uint8 kt_cp(kouta_t* kt, Uint16 value)
 {
@@ -2248,7 +2256,7 @@ kt_op_t kt_op_table[512] = {
     { 0x35, "DEC", KT_REG_IND, KT_HL, 0, 0, kt_dec_hl_ind, 1, 12 },
     { 0x36, "LD", KT_REG_IND, KT_HL, KT_IMM8, 0,
         kt_ld_reg16_ind_imm8, 2, 12 },
-    { 0x37, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0x37, "SCF", 0, 0, 0, 0, kt_scf, 1, 4 },
     { 0x38, "JR C", KT_REL8, 0, 0, 0, kt_jr_c_rel8, 2, 8 },
     { 0x39, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0x3A, "LD", KT_REG, KT_A, KT_REG_IND_DEC, KT_HL,
