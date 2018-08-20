@@ -3574,6 +3574,7 @@ void render_map(int* pix, Uint8* map, Uint8 scx, Uint8 scy)
     Uint8* tiles;
     int base_index;
     int starty, startx;
+    int endy, endx;
 
     if (kt.lcdc & KT_LCDC_TILES) {
         /* 0-127 from 8000-87FF */
@@ -3589,10 +3590,12 @@ void render_map(int* pix, Uint8* map, Uint8 scx, Uint8 scy)
 
     startx = SDL_max(0, scx / 8);
     starty = SDL_max(0, scy / 8);
+    endx = SDL_max(0, (scx + KT_WIDTH) / 8 + 1);
+    endy = SDL_max(0, (scy + KT_HEIGHT) / 8 + 1);
 
-    for (y = starty; y < starty + KT_HEIGHT / 8; ++y)
+    for (y = starty; y < endy; ++y)
     {
-        for (x = startx; x < startx + KT_WIDTH / 8; ++x)
+        for (x = startx; x < endx; ++x)
         {
             int l, t;
             int tile_index;
