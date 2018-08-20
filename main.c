@@ -2512,7 +2512,7 @@ kt_op_t kt_op_table[512] = {
     { 0xD7, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xD8, "RET C", 0, 0, 0, 0, kt_ret_c, 1, 8 },
     { 0xD9, "RETI", 0, 0, 0, 0, kt_reti, 1, 16 },
-    { 0xDA, "JP C", KT_IMM16, 0, 0, 0, kt_jp_c_imm16, 1, 12 },
+    { 0xDA, "JP C", KT_IMM16, 0, 0, 0, kt_jp_c_imm16, 3, 12 },
     { 0xDB, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xDC, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xDD, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
