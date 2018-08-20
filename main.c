@@ -1246,7 +1246,7 @@ void kt_ld_imm16_ind_reg8(kouta_t* kt, kt_op_t* instruction)
     int addr;
 
     addr = kt_read2(kt, kt->pc + 1);
-    kt_write2(kt, addr, kt_get_reg(kt, instruction->src));
+    kt_write(kt, addr, kt_get_reg(kt, instruction->src));
 }
 
 /* ld (imm16),sp */
