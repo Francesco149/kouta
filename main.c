@@ -789,7 +789,13 @@ Uint8 kt_read(kouta_t* kt, int addr)
         {
             if (!kt->ram_enabled) {
                 log_puts("tried to write disabled ram");
-            } else {
+            }
+
+            else if (!(kt->memory_model & KT_MEM_HAS_RAM)) {
+                log_puts("tried to write external ram but has none");
+            }
+
+            else {
                 return kt->ram[kt->ram_bank * 0x2000 + (addr & 0x1FFF)];
             }
         }
