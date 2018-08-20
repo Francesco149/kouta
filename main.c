@@ -2345,7 +2345,8 @@ enum kt_addressing_mode
 kt_op_t kt_op_table[512] = {
     { 0x00, "NOP", 0, 0, 0, 0, kt_nop, 1, 4 },
     { 0x01, "LD", KT_REG, KT_BC, KT_IMM16, 0, kt_ld_reg16_imm16, 3, 12 },
-    { 0x02, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0x02, "LD", KT_REG_IND, KT_BC, KT_REG, KT_A,
+        kt_ld_reg16_ind_reg8, 1, 8 },
     { 0x03, "INC", KT_REG, KT_DE, 0, 0, kt_inc_reg16, 1, 8 },
     { 0x04, "INC", KT_REG, KT_B, 0, 0, kt_inc_reg8, 1, 4 },
     { 0x05, "DEC", KT_REG, KT_B, 0, 0, kt_dec_reg8, 1, 4 },
