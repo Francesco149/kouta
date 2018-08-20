@@ -1089,6 +1089,12 @@ void kt_nop(kouta_t* kt, kt_op_t* instruction)
     (void)instruction;
 }
 
+void kt_halt(kouta_t* kt, kt_op_t* instruction)
+{
+    (void)instruction;
+    kt->halt = 1;
+}
+
 /* ld reg8,imm8 */
 void kt_ld_reg8_imm8(kouta_t* kt, kt_op_t* instruction)
 {
@@ -2230,7 +2236,7 @@ kt_op_t kt_op_table[512] = {
     { 0x73, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0x74, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0x75, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
-    { 0x76, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0x76, "HALT", 0, 0, 0, 0, kt_halt, 1, 4 },
     { 0x77, "LD", KT_REG_IND, KT_HL, KT_REG, KT_A,
         kt_ld_reg16_ind_reg8, 1, 8 },
     { 0x78, "LD", KT_REG, KT_A, KT_REG, KT_B, kt_ld_reg8_reg8, 1, 4 },
@@ -2896,6 +2902,7 @@ int kt_check_interrupt(kouta_t* kt, int interrupt, Uint16 vector)
     kt->ime = 0;
     kt_push2(kt, kt->pc);
     kt->pc = vector;
+    kt->halt = 0;
 
 #ifdef KT_DEBUG
     log_print(log_line, "*** INTERRUPT %02X ***", vector);
@@ -2947,13 +2954,14 @@ int kt_tick(kouta_t* kt)
         return 0;
     }
 
-    if (kt->halt) {
-        return 0;
-    }
-
     kt_update_interrupts(kt);
 
     start = kt->n_cycles;
+
+    if (kt->halt) {
+        kt->n_cycles += 40;
+        goto skip_instruction;
+    }
 
     op = kt_read(kt, kt->pc);
     if (op == 0xCB) {
@@ -2990,6 +2998,7 @@ int kt_tick(kouta_t* kt)
         SDL_Log("%s", buf);
     }
 
+skip_instruction:
     res = kt->n_cycles - start;
 
     kt_update_dma(kt, res);
