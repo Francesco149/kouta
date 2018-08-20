@@ -1672,6 +1672,16 @@ void kt_and_imm8(kouta_t* kt, kt_op_t* instruction)
     kt_and8(kt, value);
 }
 
+/* and (hl) */
+void kt_and_hl_ind(kouta_t* kt, kt_op_t* instruction)
+{
+    Uint8 value;
+
+    (void)instruction;
+    value = kt_read(kt, kt->regs[KT_HL >> 4]);
+    kt_and8(kt, value);
+}
+
 /* daa */
 void kt_daa(kouta_t* kt, kt_op_t* instruction)
 {
@@ -2492,7 +2502,7 @@ kt_op_t kt_op_table[512] = {
     { 0xA3, "AND", KT_REG, KT_E, 0, 0, kt_and_reg8, 1, 4 },
     { 0xA4, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xA5, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
-    { 0xA6, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xA6, "AND", KT_REG_IND, KT_HL, 0, 0, kt_and_hl_ind, 1, 8 },
     { 0xA7, "AND", KT_REG, KT_A, 0, 0, kt_and_reg8, 1, 4 },
     { 0xA8, "XOR", KT_REG, KT_B, 0, 0, kt_xor_reg8, 1, 4 },
     { 0xA9, "XOR", KT_REG, KT_C, 0, 0, kt_xor_reg8, 1, 4 },
