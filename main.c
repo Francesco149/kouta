@@ -2936,7 +2936,7 @@ kt_op_t kt_op_table[512] = {
     { 0x13, "RL", KT_REG, KT_E, 0, 0, kt_rl_reg8, 2, 8 },
     { 0x14, "RL", KT_REG, KT_H, 0, 0, kt_rl_reg8, 2, 8 },
     { 0x15, "RL", KT_REG, KT_L, 0, 0, kt_rl_reg8, 2, 8 },
-    { 0x16, "RL", KT_REG_IND, KT_HL, 0, 0, kt_rl_hl_ind, 2, 8 },
+    { 0x16, "RL", KT_REG_IND, KT_HL, 0, 0, kt_rl_hl_ind, 2, 16 },
     { 0x17, "RL", KT_REG, KT_A, 0, 0, kt_rl_reg8, 2, 8 },
     { 0x18, "RR", KT_REG, KT_B, 0, 0, kt_rr_reg8, 2, 8 },
     { 0x19, "RR", KT_REG, KT_C, 0, 0, kt_rr_reg8, 2, 8 },
