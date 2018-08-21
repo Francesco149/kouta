@@ -1307,7 +1307,7 @@ Uint16 kt_add_sp8(kouta_t* kt, Sint8 value)
     sp = kt->regs[KT_SP >> 4];
     result = (Uint16)(sp + value);
 
-    kt->regs[KT_AF >> 4] = 0;
+    kt->regs[KT_AF >> 4] &= 0xFF00;
     kt_set_flag(kt, KT_HCARRY, (sp ^ value ^ result) & 0x10);
     kt_set_flag(kt, KT_CARRY, result < sp);
     kt_set_flag(kt, KT_CARRY, (result & 0xFF) < (sp & 0xFF));
