@@ -1216,6 +1216,15 @@ void kt_ld_reg8_ind_reg8(kouta_t* kt, kt_op_t* instruction)
     kt_write(kt, addr, kt_get_reg(kt, instruction->src));
 }
 
+/* ld reg8,(0xFF00 + reg8) */
+void kt_ld_reg8_reg8_ind(kouta_t* kt, kt_op_t* instruction)
+{
+    int addr;
+
+    addr = 0xFF00 + kt_get_reg(kt, instruction->src);
+    kt_set_reg(kt, instruction->dst, kt_read(kt, addr));
+}
+
 /* ld (0xFF00 + himem8),reg8 */
 void kt_ld_himem8_ind_reg8(kouta_t* kt, kt_op_t* instruction)
 {
@@ -2804,7 +2813,8 @@ kt_op_t kt_op_table[512] = {
     { 0xF0, "LD", KT_REG, KT_A, KT_HIMEM8_IND, 0,
         kt_ld_reg8_himem8_ind, 2, 12 },
     { 0xF1, "POP", KT_REG, KT_AF, 0, 0, kt_pop_af, 1, 12 },
-    { 0xF2, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xF2, "LD", KT_REG, KT_A, KT_REG_IND, KT_C,
+        kt_ld_reg8_reg8_ind, 2, 8 },
     { 0xF3, "DI", 0, 0, 0, 0, kt_di, 1, 4 },
     { 0xF4, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xF5, "PUSH", KT_REG, KT_AF, 0, 0, kt_push_reg16, 1, 16 },
