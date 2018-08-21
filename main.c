@@ -1512,6 +1512,21 @@ void kt_adc_a_reg8(kouta_t* kt, kt_op_t* instruction)
     kt_add_a(kt, (Uint16)(value + carry));
 }
 
+/* adc a,imm8 */
+void kt_adc_a_imm8(kouta_t* kt, kt_op_t* instruction)
+{
+    Uint8 value;
+    Uint8 carry;
+
+    (void)instruction;
+
+    value = kt_read(kt, kt->pc + 1);
+    carry = kt->regs[KT_AF >> 4];
+    carry &= KT_CARRY;
+    carry >>= 4;
+    kt_add_a(kt, (Uint16)(value + carry));
+}
+
 /* adc a,(hl) */
 void kt_adc_a_hl_ind(kouta_t* kt, kt_op_t* instruction)
 {
@@ -2651,7 +2666,7 @@ kt_op_t kt_op_table[512] = {
     { 0xCB, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xCC, "CALL Z", KT_IMM16, 0, 0, 0, kt_call_z_imm16, 3, 12 },
     { 0xCD, "CALL", KT_IMM16, 0, 0, 0, kt_call_imm16, 3, 24 },
-    { 0xCE, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xCE, "ADC", KT_REG, KT_A, KT_IMM8, 0, kt_adc_a_imm8, 2, 8 },
     { 0xCF, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xD0, "RET", 0, 0, 0, 0, kt_ret_nc, 1, 8 },
     { 0xD1, "POP", KT_REG, KT_DE, 0, 0, kt_pop_reg16, 1, 12 },
