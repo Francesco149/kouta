@@ -1831,14 +1831,15 @@ void kt_daa(kouta_t* kt, kt_op_t* instruction)
         }
     }
 
-    kt_set_flag(kt, KT_ZERO, !value);
-    kt->regs[KT_AF >> 4] &= ~KT_HCARRY;
-
     if (value & 0x100) {
         kt->regs[KT_AF >> 4] |= KT_CARRY;
     }
 
-    kt_set_reg(kt, KT_A, value & 0x00FF);
+    value &= 0xFF;
+    kt_set_flag(kt, KT_ZERO, !value);
+    kt->regs[KT_AF >> 4] &= ~KT_HCARRY;
+
+    kt_set_reg(kt, KT_A, value);
 }
 
 /* jp imm16 */
