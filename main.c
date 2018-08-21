@@ -3185,7 +3185,7 @@ void kt_update_timer(kouta_t* kt, int delta_cycles)
     kt->div_cycles -= delta_cycles;
 
     if (kt->div_cycles <= 0) {
-        kt->div_cycles = 0x100;
+        kt->div_cycles += 0x100;
         ++kt->div;
     }
 
@@ -3195,7 +3195,7 @@ void kt_update_timer(kouta_t* kt, int delta_cycles)
 
         if (kt->tima_cycles <= 0)
         {
-            kt->tima_cycles = kt_tima_clocks[kt->tac & KT_TAC_CLOCK_BITS];
+            kt->tima_cycles += kt_tima_clocks[kt->tac & KT_TAC_CLOCK_BITS];
 
             if (kt->tima == 0xFF) {
                 kt->tima = kt->tma;
