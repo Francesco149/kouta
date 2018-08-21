@@ -1325,16 +1325,16 @@ Uint16 kt_add_sp8(kouta_t* kt, Sint8 value)
     result = (Uint16)(sp + value);
 
     kt->regs[KT_AF >> 4] &= 0xFF00;
-    kt_set_flag(kt, KT_HCARRY, (sp ^ value ^ result) & 0x10);
-    kt_set_flag(kt, KT_CARRY, result < sp);
-    kt_set_flag(kt, KT_CARRY, (result & 0xFF) < (sp & 0xFF));
 
-    /*
-     * TODO: are we sure it's supposed to set C even if the lower byte
-     * carries?
-     */
+    if ((sp ^ value ^ result) & 0x10) {
+        kt->regs[KT_AF >> 4] |= KT_HCARRY;
+    }
 
-    return sp;
+    if (result < value || (result & 0xFF) < (value & 0xFF)) {
+        kt->regs[KT_AF >> 4] |= KT_CARRY;
+    }
+
+    return result;
 }
 
 /* ld hl,sp+sprel8 */
