@@ -1509,7 +1509,7 @@ void kt_add_a(kouta_t* kt, Uint16 value)
 
     kt->regs[KT_AF >> 4] = 0;
     kt_set_flag(kt, KT_HCARRY, (a ^ value ^ result) & 0x10);
-    kt_set_flag(kt, KT_CARRY, result < a); /* wrapped around */
+    kt_set_flag(kt, KT_CARRY, (a + value) & 0xFF00);
     kt_set_flag(kt, KT_ZERO, !result);
     kt_set_a(kt, result);
 }
