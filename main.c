@@ -2902,7 +2902,7 @@ kt_op_t kt_op_table[512] = {
     { 0x06, "RLC", KT_REG_IND, KT_HL, 0, 0, kt_rlc_hl_ind, 2, 16 },
     { 0x07, "RLC", KT_REG, KT_A, 0, 0, kt_rlc_reg8, 2, 8 },
     { 0x08, "RRC", KT_REG, KT_B, 0, 0, kt_rrc_reg8, 2, 8 },
-    { 0x09, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
+    { 0x09, "RRC", KT_REG, KT_C, 0, 0, kt_rrc_reg8, 2, 8 },
     { 0x0A, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
     { 0x0B, "RRC", KT_REG, KT_E, 0, 0, kt_rrc_reg8, 2, 8 },
     { 0x0C, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
