@@ -3184,7 +3184,7 @@ kt_op_t kt_op_table[512] = {
     { 0xCA, "SET", KT_REG, KT_D, KT_BIT, 1, kt_set_reg8, 2, 8 },
     { 0xCB, "SET", KT_REG, KT_E, KT_BIT, 1, kt_set_reg8, 2, 8 },
     { 0xCC, "SET", KT_REG, KT_H, KT_BIT, 1, kt_set_reg8, 2, 8 },
-    { 0xCD, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
+    { 0xCD, "SET", KT_REG, KT_L, KT_BIT, 1, kt_set_reg8, 2, 8 },
     { 0xCE, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
     { 0xCF, "SET", KT_REG, KT_A, KT_BIT, 1, kt_set_reg8, 2, 8 },
     { 0xD0, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
