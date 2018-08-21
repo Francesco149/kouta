@@ -2100,6 +2100,20 @@ void kt_pop_reg16(kouta_t* kt, kt_op_t* instruction)
     kt->regs[instruction->dst >> 4] = kt_pop2(kt);
 }
 
+/* pop af */
+void kt_pop_af(kouta_t* kt, kt_op_t* instruction)
+{
+    Uint16 value;
+
+    (void)instruction;
+
+    value = kt_pop2(kt);
+    value &= 0xFFF0;
+
+    kt->regs[KT_AF >> 4] &= 0x0FFF;
+    kt->regs[KT_AF >> 4] |= value;
+}
+
 /* set n,reg8 */
 void kt_set_reg8(kouta_t* kt, kt_op_t* instruction)
 {
@@ -2725,7 +2739,7 @@ kt_op_t kt_op_table[512] = {
     { 0xEF, "RST", KT_LOMEM, 0x28, 0, 0, kt_rst_lomem, 1, 16 },
     { 0xF0, "LD", KT_REG, KT_A, KT_HIMEM8_IND, 0,
         kt_ld_reg8_himem8_ind, 2, 12 },
-    { 0xF1, "POP", KT_REG, KT_AF, 0, 0, kt_pop_reg16, 1, 12 },
+    { 0xF1, "POP", KT_REG, KT_AF, 0, 0, kt_pop_af, 1, 12 },
     { 0xF2, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xF3, "DI", 0, 0, 0, 0, kt_di, 1, 4 },
     { 0xF4, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
