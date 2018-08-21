@@ -1815,20 +1815,12 @@ void kt_daa(kouta_t* kt, kt_op_t* instruction)
 
     else
     {
-        if (af & KT_HCARRY) {
+        if (af & KT_HCARRY || (value & 0x0F) > 0x09) {
             value += 0x06;
-        } else {
-            if ((value & 0x0F) > 0x09) {
-                value += 0x06;
-            }
         }
 
-        if (af & KT_CARRY) {
+        if (af & KT_CARRY || value > 0x9F) {
             value += 0x60;
-        } else {
-            if (value > 0x9F) {
-                value += 0x60;
-            }
         }
     }
 
