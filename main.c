@@ -2446,6 +2446,7 @@ Uint8 kt_rlc8(kouta_t* kt, Uint8 value)
     return value;
 }
 
+/* rlc reg8 */
 void kt_rlc_reg8(kouta_t* kt, kt_op_t* instruction)
 {
     Uint8 value;
