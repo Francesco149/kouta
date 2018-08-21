@@ -1688,6 +1688,24 @@ void kt_sbc_a_imm8(kouta_t* kt, kt_op_t* instruction)
     kt_set_a(kt, result);
 }
 
+/* sbc a,(hl) */
+void kt_sbc_a_hl_ind(kouta_t* kt, kt_op_t* instruction)
+{
+    Uint16 addr;
+    Uint8 value;
+    Uint8 carry;
+    Uint8 result;
+
+    (void)instruction;
+    addr = kt->regs[KT_HL >> 4];
+    value = kt_read(kt, addr);
+    carry = kt->regs[KT_AF >> 4];
+    carry &= KT_CARRY;
+    carry >>= 4;
+    result = kt_cp(kt, (Uint16)(value + carry));
+    kt_set_a(kt, result);
+}
+
 /* or *8 */
 void kt_or8(kouta_t* kt, Uint8 value)
 {
@@ -2725,7 +2743,7 @@ kt_op_t kt_op_table[512] = {
     { 0x9B, "SBC", KT_REG, KT_A, KT_REG, KT_E, kt_sbc_a_reg8, 1, 4 },
     { 0x9C, "SBC", KT_REG, KT_A, KT_REG, KT_H, kt_sbc_a_reg8, 1, 4 },
     { 0x9D, "SBC", KT_REG, KT_A, KT_REG, KT_L, kt_sbc_a_reg8, 1, 4 },
-    { 0x9E, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0x9E, "SBC", KT_REG, KT_A, KT_REG_IND, KT_HL, kt_sbc_a_hl_ind, 1, 8 },
     { 0x9F, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xA0, "AND", KT_REG, KT_B, 0, 0, kt_and_reg8, 1, 4 },
     { 0xA1, "AND", KT_REG, KT_C, 0, 0, kt_and_reg8, 1, 4 },
