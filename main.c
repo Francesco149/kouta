@@ -1683,7 +1683,7 @@ void kt_or_hl_ind(kouta_t* kt, kt_op_t* instruction)
 /* xor *8 */
 void kt_xor8(kouta_t* kt, Uint8 value)
 {
-    Uint16 result;
+    Uint8 result;
 
     result = kt_get_reg(kt, KT_A);
     result ^= value;
