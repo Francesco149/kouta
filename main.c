@@ -3056,7 +3056,7 @@ kt_op_t kt_op_table[512] = {
     { 0x4A, "BIT", KT_REG, KT_D, KT_BIT, 1, kt_bit_reg8, 2, 8 },
     { 0x4B, "BIT", KT_REG, KT_E, KT_BIT, 1, kt_bit_reg8, 2, 8 },
     { 0x4C, "BIT", KT_REG, KT_H, KT_BIT, 1, kt_bit_reg8, 2, 8 },
-    { 0x4D, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
+    { 0x4D, "BIT", KT_REG, KT_L, KT_BIT, 1, kt_bit_reg8, 2, 8 },
     { 0x4E, "BIT", KT_REG_IND, KT_HL, KT_BIT, 1, kt_bit_hl_ind, 2, 16 },
     { 0x4F, "BIT", KT_REG, KT_A, KT_BIT, 1, kt_bit_reg8, 2, 8 },
     { 0x50, "BIT", KT_REG, KT_B, KT_BIT, 2, kt_bit_reg8, 2, 8 },
