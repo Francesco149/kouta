@@ -3199,8 +3199,7 @@ void kt_update_lcd(kouta_t* kt, int n_cycles)
         break;
 
     case KT_STAT_VBLANK:
-        kt->n_lcd_cycles = SDL_min(4560, kt->n_lcd_cycles);
-        kt->ly = KT_HEIGHT + kt->n_lcd_cycles / 506;
+        kt->ly = SDL_min(153, KT_HEIGHT + kt->n_lcd_cycles / 506);
 
         if (kt->n_lcd_cycles >= 4560)
         {
