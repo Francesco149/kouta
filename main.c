@@ -510,6 +510,7 @@ struct kouta
     Uint64 n_cycles;
     int entered_vblank;
     int halt;
+    int stop;
     int error;
     int disable_dmg_rom;
     Uint8 dpad;
@@ -1149,6 +1150,12 @@ void kt_halt(kouta_t* kt, kt_op_t* instruction)
 {
     (void)instruction;
     kt->halt = 1;
+}
+
+void kt_stop(kouta_t* kt, kt_op_t* instruction)
+{
+    (void)instruction;
+    kt->stop = 1;
 }
 
 /* ld reg8,imm8 */
@@ -2544,7 +2551,7 @@ kt_op_t kt_op_table[512] = {
     { 0x0D, "DEC", KT_REG, KT_C, 0, 0, kt_dec_reg8, 1, 4 },
     { 0x0E, "LD", KT_REG, KT_C, KT_IMM8, 0, kt_ld_reg8_imm8, 2, 8 },
     { 0x0F, "RRCA", 0, 0, 0, 0, kt_rrca, 1, 4 },
-    { 0x10, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0x10, "STOP", 0, 0, 0, 0, kt_stop, 2, 4 },
     { 0x11, "LD", KT_REG, KT_DE, KT_IMM16, 0, kt_ld_reg16_imm16, 3, 12 },
     { 0x12, "LD", KT_REG_IND, KT_DE, KT_REG, KT_A,
         kt_ld_reg16_ind_reg8, 1, 8 },
@@ -3389,6 +3396,16 @@ int kt_tick(kouta_t* kt)
     if (kt->halt) {
         kt->n_cycles += 40;
         goto skip_instruction;
+    }
+
+    if (kt->stop)
+    {
+        if (kt->buttons) {
+            kt->stop = 0;
+        } else {
+            kt->n_cycles += 40;
+            goto skip_instruction;
+        }
     }
 
     op = kt_read(kt, kt->pc);
