@@ -2258,15 +2258,12 @@ void kt_res_hl_ind(kouta_t* kt, kt_op_t* instruction)
     kt_write(kt, address, value);
 }
 
-/* rl reg8 */
-void kt_rl_reg8(kouta_t* kt, kt_op_t* instruction)
+/* rl *8 */
+Uint8 kt_rl8(kouta_t* kt, Uint8 value)
 {
-    Uint8 value;
     Uint8 old;
 
-    value = (Uint8)kt_get_reg(kt, instruction->dst);
     old = value;
-
     value <<= 1;
 
     if (kt->regs[KT_AF >> 4] & KT_CARRY) {
@@ -2278,7 +2275,31 @@ void kt_rl_reg8(kouta_t* kt, kt_op_t* instruction)
     kt->regs[KT_AF >> 4] &= 0xFF00;
     kt_set_flag(kt, KT_CARRY, old & 0x80);
     kt_set_flag(kt, KT_ZERO, !value);
+
+    return value;
+}
+
+/* rl reg8 */
+void kt_rl_reg8(kouta_t* kt, kt_op_t* instruction)
+{
+    Uint8 value;
+
+    value = (Uint8)kt_get_reg(kt, instruction->dst);
+    value = kt_rl8(kt, value);
     kt_set_reg(kt, instruction->dst, value);
+}
+
+/* rl (hl) */
+void kt_rl_hl_ind(kouta_t* kt, kt_op_t* instruction)
+{
+    Uint16 addr;
+    Uint8 value;
+
+    (void)instruction;
+    addr = kt->regs[KT_HL >> 4];
+    value = kt_read(kt, addr);
+    value = kt_rl8(kt, value);
+    kt_write(kt, addr, value);
 }
 
 /* rrca */
@@ -2915,7 +2936,7 @@ kt_op_t kt_op_table[512] = {
     { 0x13, "RL", KT_REG, KT_E, 0, 0, kt_rl_reg8, 2, 8 },
     { 0x14, "RL", KT_REG, KT_H, 0, 0, kt_rl_reg8, 2, 8 },
     { 0x15, "RL", KT_REG, KT_L, 0, 0, kt_rl_reg8, 2, 8 },
-    { 0x16, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
+    { 0x16, "RL", KT_REG_IND, KT_HL, 0, 0, kt_rl_hl_ind, 2, 8 },
     { 0x17, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
     { 0x18, "RR", KT_REG, KT_B, 0, 0, kt_rr_reg8, 2, 8 },
     { 0x19, "RR", KT_REG, KT_C, 0, 0, kt_rr_reg8, 2, 8 },
