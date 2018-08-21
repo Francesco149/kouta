@@ -1804,7 +1804,7 @@ void kt_daa(kouta_t* kt, kt_op_t* instruction)
     if (af & KT_SUBTRACT)
     {
         if (af & KT_HCARRY) {
-            value -= 0x06;
+            value -= 0x06, value &= 0xFF;
         }
 
         if (af & KT_CARRY) {
