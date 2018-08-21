@@ -2035,6 +2035,12 @@ void kt_call_nz_imm16(kouta_t* kt, kt_op_t* instruction)
     kt_call_cond_imm16(kt, KT_ZERO, 0, instruction);
 }
 
+/* call nc imm16 */
+void kt_call_nc_imm16(kouta_t* kt, kt_op_t* instruction)
+{
+    kt_call_cond_imm16(kt, KT_CARRY, 0, instruction);
+}
+
 /* ret */
 void kt_ret(kouta_t* kt, kt_op_t* instruction)
 {
@@ -2732,7 +2738,7 @@ kt_op_t kt_op_table[512] = {
     { 0xD1, "POP", KT_REG, KT_DE, 0, 0, kt_pop_reg16, 1, 12 },
     { 0xD2, "JP NC", KT_IMM16, 0, 0, 0, kt_jp_nc_imm16, 3, 12 },
     { 0xD3, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
-    { 0xD4, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xD4, "CALL NC", KT_IMM16, 0, 0, 0, kt_call_nc_imm16, 3, 12 },
     { 0xD5, "PUSH", KT_REG, KT_DE, 0, 0, kt_push_reg16, 1, 16 },
     { 0xD6, "SUB", KT_IMM8, 0, 0, 0, kt_sub_imm8, 2, 8 },
     { 0xD7, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
