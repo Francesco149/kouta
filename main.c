@@ -2756,7 +2756,7 @@ kt_op_t kt_op_table[512] = {
     { 0xA7, "AND", KT_REG, KT_A, 0, 0, kt_and_reg8, 1, 4 },
     { 0xA8, "XOR", KT_REG, KT_B, 0, 0, kt_xor_reg8, 1, 4 },
     { 0xA9, "XOR", KT_REG, KT_C, 0, 0, kt_xor_reg8, 1, 4 },
-    { 0xAA, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xAA, "XOR", KT_REG, KT_D, 0, 0, kt_xor_reg8, 1, 4 },
     { 0xAB, "XOR", KT_REG, KT_E, 0, 0, kt_xor_reg8, 1, 4 },
     { 0xAC, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xAD, "XOR", KT_REG, KT_L, 0, 0, kt_xor_reg8, 1, 4 },
