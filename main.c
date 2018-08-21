@@ -2704,7 +2704,7 @@ kt_op_t kt_op_table[512] = {
     { 0x87, "ADD", KT_REG, KT_A, KT_REG, KT_A, kt_add_a_reg8, 1, 4 },
     { 0x88, "ADC", KT_REG, KT_A, KT_REG, KT_B, kt_adc_a_reg8, 1, 4 },
     { 0x89, "ADC", KT_REG, KT_A, KT_REG, KT_C, kt_adc_a_reg8, 1, 4 },
-    { 0x8A, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0x8A, "ADC", KT_REG, KT_A, KT_REG, KT_D, kt_adc_a_reg8, 1, 4 },
     { 0x8B, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0x8C, "ADC", KT_REG, KT_A, KT_REG, KT_H, kt_adc_a_reg8, 1, 4 },
     { 0x8D, "ADC", KT_REG, KT_A, KT_REG, KT_L, kt_adc_a_reg8, 1, 4 },
