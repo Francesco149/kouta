@@ -2758,7 +2758,7 @@ kt_op_t kt_op_table[512] = {
     { 0xBC, "CP", KT_REG, KT_H, 0, 0, kt_cp_reg8, 1, 4 },
     { 0xBD, "CP", KT_REG, KT_H, 0, 0, kt_cp_reg8, 1, 4 },
     { 0xBE, "CP", KT_REG_IND, KT_HL, 0, 0, kt_cp_hl_ind, 1, 8 },
-    { 0xBF, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xBF, "CP", KT_REG, KT_A, 0, 0, kt_cp_reg8, 1, 4 },
     { 0xC0, "RET NZ", 0, 0, 0, 0, kt_ret_nz, 1, 8 },
     { 0xC1, "POP", KT_REG, KT_BC, 0, 0, kt_pop_reg16, 1, 12 },
     { 0xC2, "JP NZ", KT_IMM16, 0, 0, 0, kt_jp_nz_imm16, 3, 12 },
