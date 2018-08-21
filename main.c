@@ -564,6 +564,11 @@ struct kouta
     Uint8 if_;
 
     Uint8 oam[0xA0];
+
+#ifdef KT_LOG_SERIAL
+    Uint8 serial_out[4096];
+    int serial_out_len;
+#endif
 };
 
 typedef struct kouta kouta_t;
@@ -1023,7 +1028,18 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
             kt->joyp |= value;
             kt_update_joyp(kt);
             return;
-        case 0xFF01: return; /* TODO: serial cable shit */
+        case 0xFF01:
+#ifdef KT_LOG_SERIAL
+            if (value == 0x0A ||
+                kt->serial_out_len >= (int)sizeof(kt->serial_out))
+            {
+                SDL_Log("%s", kt->serial_out);
+                kt->serial_out_len = 0;
+            }
+
+            kt->serial_out[kt->serial_out_len++] = value;
+#endif
+            return;
         case 0xFF02: return;
         case 0xFF04: kt->div = 0; return;
         case 0xFF05: kt->tima = value; return;
