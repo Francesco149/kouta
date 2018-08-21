@@ -1031,8 +1031,9 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
         case 0xFF01:
 #ifdef KT_LOG_SERIAL
             if (value == 0x0A ||
-                kt->serial_out_len >= (int)sizeof(kt->serial_out))
+                kt->serial_out_len >= (int)sizeof(kt->serial_out) - 1)
             {
+                kt->serial_out[kt->serial_out_len] = 0;
                 SDL_Log("%s", kt->serial_out);
                 kt->serial_out_len = 0;
             }
