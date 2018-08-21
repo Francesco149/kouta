@@ -3123,18 +3123,6 @@ void kt_update_lcd(kouta_t* kt, int n_cycles)
     kt->entered_vblank = 0;
     kt->n_lcd_cycles += n_cycles;
 
-    if (!(kt->lcdc & KT_LCDC_ENABLE))
-    {
-        if ((kt->stat & KT_STAT_MODE_BITS) != KT_INT_VBLANK) {
-            kt->if_ |= KT_INT_VBLANK;
-            kt_check_stat_int(kt, KT_STAT_INT_VBLANK);
-            kt->entered_vblank = 1;
-        }
-
-        kt->stat &= ~KT_STAT_MODE_BITS;
-        kt->stat |= KT_STAT_VBLANK;
-    }
-
     switch (kt->stat & KT_STAT_MODE_BITS)
     {
     case KT_STAT_HBLANK:
@@ -3151,7 +3139,7 @@ void kt_update_lcd(kouta_t* kt, int n_cycles)
         kt->n_lcd_cycles = SDL_min(4560, kt->n_lcd_cycles);
         kt->ly = KT_HEIGHT + kt->n_lcd_cycles / 506;
 
-        if ((kt->lcdc & KT_LCDC_ENABLE) && kt->n_lcd_cycles >= 4560)
+        if (kt->n_lcd_cycles >= 4560)
         {
             kt->stat &= ~KT_STAT_MODE_BITS;
             kt->stat |= KT_STAT_READING_OAM;
