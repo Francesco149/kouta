@@ -3194,7 +3194,7 @@ void kt_update_lcd(kouta_t* kt, int n_cycles)
             kt->stat &= ~KT_STAT_MODE_BITS;
             kt->stat |= KT_STAT_READING_OAM;
             kt_check_stat_int(kt, KT_STAT_INT_OAM);
-            kt->n_lcd_cycles = 0;
+            kt->n_lcd_cycles -= 201;
         }
         break;
 
@@ -3207,7 +3207,7 @@ void kt_update_lcd(kouta_t* kt, int n_cycles)
             kt->stat &= ~KT_STAT_MODE_BITS;
             kt->stat |= KT_STAT_READING_OAM;
             kt_check_stat_int(kt, KT_STAT_INT_OAM);
-            kt->n_lcd_cycles = 0;
+            kt->n_lcd_cycles -= 4560;
             kt->ly = 0;
         }
         break;
@@ -3217,7 +3217,7 @@ void kt_update_lcd(kouta_t* kt, int n_cycles)
         {
             kt->stat &= ~KT_STAT_MODE_BITS;
             kt->stat |= KT_STAT_READING_OAM_VRAM;
-            kt->n_lcd_cycles = 0;
+            kt->n_lcd_cycles -= 77;
         }
         break;
 
@@ -3226,7 +3226,7 @@ void kt_update_lcd(kouta_t* kt, int n_cycles)
         {
             ++kt->ly;
             kt->stat &= ~KT_STAT_MODE_BITS;
-            kt->n_lcd_cycles = 0;
+            kt->n_lcd_cycles -= 169;
 
             if (kt->ly == kt->lyc) {
                 kt->stat |= KT_STAT_COINCIDENCE;
