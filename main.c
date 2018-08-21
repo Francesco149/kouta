@@ -2110,7 +2110,7 @@ void kt_pop_af(kouta_t* kt, kt_op_t* instruction)
     value = kt_pop2(kt);
     value &= 0xFFF0;
 
-    kt->regs[KT_AF >> 4] &= 0x0FFF;
+    kt->regs[KT_AF >> 4] &= 0x000F;
     kt->regs[KT_AF >> 4] |= value;
 }
 
