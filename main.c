@@ -3014,7 +3014,7 @@ kt_op_t kt_op_table[512] = {
         kt_ld_reg16_ind_imm8, 2, 12 },
     { 0x37, "SWAP", KT_REG, KT_A, 0, 0, kt_swap_reg8, 2, 8 },
     { 0x38, "SRL", KT_REG, KT_B, 0, 0, kt_srl_reg8, 2, 8 },
-    { 0x39, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
+    { 0x39, "SRL", KT_REG, KT_C, 0, 0, kt_srl_reg8, 2, 8 },
     { 0x3A, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
     { 0x3B, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
     { 0x3C, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 2, 0 },
