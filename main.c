@@ -1299,21 +1299,16 @@ void kt_ld_imm16_ind_sp(kouta_t* kt, kt_op_t* instruction)
     kt_write2(kt, addr, kt->regs[KT_SP >> 4]);
 }
 
-/* ld hl,sp+sprel8 */
-void kt_ld_hl_sprel8(kouta_t* kt, kt_op_t* instruction)
+Uint16 kt_add_sp8(kouta_t* kt, Sint8 value)
 {
-    Sint8 rel8;
     Uint16 sp;
     Uint16 result;
 
-    (void)instruction;
-
     sp = kt->regs[KT_SP >> 4];
-    rel8 = (Sint8)kt_read(kt, kt->pc + 1);
-    result = (Uint16)(sp + rel8);
+    result = (Uint16)(sp + value);
 
     kt->regs[KT_AF >> 4] = 0;
-    kt_set_flag(kt, KT_HCARRY, (sp ^ rel8 ^ result) & 0x10);
+    kt_set_flag(kt, KT_HCARRY, (sp ^ value ^ result) & 0x10);
     kt_set_flag(kt, KT_CARRY, result < sp);
     kt_set_flag(kt, KT_CARRY, (result & 0xFF) < (sp & 0xFF));
 
@@ -1322,7 +1317,29 @@ void kt_ld_hl_sprel8(kouta_t* kt, kt_op_t* instruction)
      * carries?
      */
 
-    kt->regs[KT_HL >> 4] = result;
+    return sp;
+}
+
+/* ld hl,sp+sprel8 */
+void kt_ld_hl_sprel8(kouta_t* kt, kt_op_t* instruction)
+{
+    Sint8 rel8;
+
+    (void)instruction;
+
+    rel8 = (Sint8)kt_read(kt, kt->pc + 1);
+    kt->regs[KT_HL >> 4] = kt_add_sp8(kt, rel8);
+}
+
+/* add sp,simm8 */
+void kt_add_sp_simm8(kouta_t* kt, kt_op_t* instruction)
+{
+    Sint8 simm8;
+
+    (void)instruction;
+
+    simm8 = (Sint8)kt_read(kt, kt->pc + 1);
+    kt->regs[KT_SP >> 4] = kt_add_sp8(kt, simm8);
 }
 
 /* ld sp,hl */
@@ -2426,6 +2443,7 @@ enum kt_addressing_mode
     KT_REG_IND_INC,
     KT_REL8,
     KT_IMM8,
+    KT_SIMM8,
     KT_LOMEM,
     KT_HIMEM8,
     KT_HIMEM8_IND,
@@ -2695,7 +2713,7 @@ kt_op_t kt_op_table[512] = {
     { 0xE5, "PUSH", KT_REG, KT_HL, 0, 0, kt_push_reg16, 1, 16 },
     { 0xE6, "AND", KT_IMM8, 0, 0, 0, kt_and_imm8, 2, 8 },
     { 0xE7, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
-    { 0xE8, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xE8, "ADD", KT_REG, KT_SP, KT_SIMM8, 0, kt_add_sp_simm8, 2, 16 },
     { 0xE9, "JP", KT_REG_IND, KT_HL, 0, 0, kt_jp_hl_ind, 1, 4 },
     { 0xEA, "LD", KT_IMM16_IND, 0, KT_REG, KT_A,
         kt_ld_imm16_ind_reg8, 3, 16 },
@@ -3046,6 +3064,11 @@ int kt_print_operand(char* buf, int buf_len, kouta_t* kt, char* prefix,
     case KT_IMM8:
         p += sys_snprintf(p, end - p, "%02X",
             kt_read(kt, kt->pc + opsize));
+        break;
+    case KT_SIMM8:
+        offset = (Sint8)kt_read(kt, kt->pc + 1);
+        p += sys_snprintf(p, end - p, "%s%02X",
+            offset < 0 ? "-" : "", offset < 0 ? -offset : offset);
         break;
     case KT_REL8:
         p += sys_snprintf(p, end - p, "%04X",
