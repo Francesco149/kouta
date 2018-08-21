@@ -2502,7 +2502,7 @@ kt_op_t kt_op_table[512] = {
         kt_ld_reg16_ind_imm8, 2, 12 },
     { 0x37, "SCF", 0, 0, 0, 0, kt_scf, 1, 4 },
     { 0x38, "JR C", KT_REL8, 0, 0, 0, kt_jr_c_rel8, 2, 8 },
-    { 0x39, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0x39, "ADD", KT_REG, KT_HL, KT_REG, KT_SP, kt_add_hl_reg16, 1, 8 },
     { 0x3A, "LD", KT_REG, KT_A, KT_REG_IND_DEC, KT_HL,
         kt_ld_reg8_hl_ind_dec, 1, 8 },
     { 0x3B, "DEC", KT_REG, KT_SP, 0, 0, kt_dec_reg16, 1, 8 },
