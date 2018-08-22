@@ -2924,7 +2924,7 @@ kt_op_t kt_op_table[512] = {
     { 0xC4, "CALL NZ", KT_IMM16, 0, 0, 0, kt_call_nz_imm16, 3, 12 },
     { 0xC5, "PUSH", KT_REG, KT_BC, 0, 0, kt_push_reg16, 1, 16 },
     { 0xC6, "ADD", KT_REG, KT_A, KT_IMM8, 0, kt_add_a_imm8, 2, 8 },
-    { 0xC7, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xC7, "RST", KT_LOMEM, 0, 0, 0, kt_rst_lomem, 1, 16 },
     { 0xC8, "RET Z", 0, 0, 0, 0, kt_ret_z, 1, 8 },
     { 0xC9, "RET", 0, 0, 0, 0, kt_ret, 1, 16 },
     { 0xCA, "JP Z", KT_IMM16, 0, 0, 0, kt_jp_z_imm16, 3, 12 },
