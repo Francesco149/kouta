@@ -3839,7 +3839,7 @@ int obp(int color, int flags)
     Uint8 palette;
     int mask;
 
-    palette = kt.obp[(flags & KT_OBJ_PALETTE >> 4) & 0x0F];
+    palette = kt.obp[((flags & KT_OBJ_PALETTE) >> 4) & 0x0F];
     mask = 3 << (color * 2);
     return (palette & mask) >> (color * 2);
 }
