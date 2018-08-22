@@ -4286,7 +4286,7 @@ void dump_map(char* path, Uint8* map)
     }
 
     if (SDL_RWwrite(io, magic, 1, strlen(magic)) != strlen(magic) ||
-        SDL_RWwrite(io, ppm, 1, len) != len)
+        SDL_RWwrite(io, ppm, 1, len * 3) != len * 3)
     {
         log_puts(SDL_GetError());
     }
