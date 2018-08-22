@@ -3892,29 +3892,22 @@ void update_tilemap()
 #define RENDER_WRAP            0x40000000
 #define RENDER_NO_TRANSPARENCY 0x20000000
 
+void wrap_coords(int* x, int* y, int stepx, int stepy, int w, int h)
+{
+    for (; *x >= w; *x -= stepx);
+    for (; *y >= h; *y -= stepy);
+}
+
 void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int flags,
     int screen_w, int screen_h)
 {
     int x, y;
 
-    if (l + 8 <= 0) {
-        return;
-    }
-
-    if (t + 8 <= 0) {
-        return;
-    }
-
     if (flags & RENDER_WRAP) {
-        l %= screen_w;
-        t %= screen_h;
+        wrap_coords(&l, &t, 256, 256, screen_w, screen_h);
     }
 
-    if (l >= screen_w) {
-        return;
-    }
-
-    if (t >= screen_h) {
+    if (l + 8 <= 0 || t + 8 <= 0 || l >= screen_w || t >= screen_h) {
         return;
     }
 
@@ -3936,9 +3929,13 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int flags,
             wrapx = l + x;
             wrapy = t + y;
 
-            if (flags & RENDER_WRAP) {
-                wrapx %= screen_w;
-                wrapy %= screen_h;
+            if (flags & RENDER_WRAP)
+            {
+                wrap_coords(&wrapx, &wrapy, 256, 256, screen_w, screen_h);
+
+                if (wrapx < 0 || wrapy < 0) {
+                    continue;
+                }
             }
 
             else if (wrapx >= screen_w || wrapy >= screen_h) {
