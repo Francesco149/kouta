@@ -4003,13 +4003,16 @@ void render_background(int* pix)
 {
     Uint8* map;
 
-    if (kt.lcdc & KT_LCDC_BG_MAP) {
-        map = &kt.vram[0x1C00];
-    } else {
-        map = &kt.vram[0x1800];
-    }
+    if (kt.lcdc & KT_LCDC_BG_ENABLE)
+    {
+        if (kt.lcdc & KT_LCDC_BG_MAP) {
+            map = &kt.vram[0x1C00];
+        } else {
+            map = &kt.vram[0x1800];
+        }
 
-    render_map(pix, map, kt.scx, kt.scy, KT_WIDTH, KT_HEIGHT);
+        render_map(pix, map, kt.scx, kt.scy, KT_WIDTH, KT_HEIGHT);
+    }
 }
 
 void render_window(int* pix)
