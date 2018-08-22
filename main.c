@@ -3991,7 +3991,8 @@ void render_map(int* pix, Uint8* map, Uint8 scx, Uint8 scy,
 
             l = x * 8 - scx;
             t = y * 8 - scy;
-            tile_index = (base_index + map[y * 32 + x]) % 0x100;
+            tile_index = (base_index + map[(y % 32) * 32 + (x % 32)]);
+            tile_index %= 0x100;
             render_tile(pix, tiles, tile_index, l, t, 1, 0,
                 screen_w, screen_h);
         }
