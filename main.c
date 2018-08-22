@@ -864,7 +864,11 @@ Uint8 kt_read(kouta_t* kt, int addr)
         case 0xFF4B: return kt->wx;
 
         default:
+#if defined(KT_DEBUG) || defined(KT_LOG_UNIMPLEMENTED_PORTS)
             log_puts("tried to read unimplemented or invalid I/O port");
+#else
+            return 0xFF;
+#endif
         }
     }
 
@@ -1075,7 +1079,11 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
         case 0xFF50: kt->disable_dmg_rom = value; return;
 
         default:
+#if defined(KT_DEBUG) || defined(KT_LOG_UNIMPLEMENTED_PORTS)
             log_puts("tried to write unimplemented or invalid i/o port");
+#else
+            return;
+#endif
         }
     }
 
