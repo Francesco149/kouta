@@ -4253,7 +4253,7 @@ void dump_patterns()
     io = SDL_RWFromFile("patterns.ppm", "wb");
     if (!io) {
         log_puts(SDL_GetError());
-        return;
+        goto cleanup;
     }
 
     if (SDL_RWwrite(io, magic, 1, strlen(magic)) != strlen(magic) ||
@@ -4265,6 +4265,9 @@ void dump_patterns()
     SDL_RWclose(io);
 
     log_puts("dumped to patterns.ppm");
+
+cleanup:
+    SDL_free(ppm);
 }
 
 void rgba_to_ppm(int* rgba, Uint8* ppm, int w, int h)
@@ -4306,7 +4309,7 @@ void dump_map(char* path, Uint8* map)
     io = SDL_RWFromFile(path, "wb");
     if (!io) {
         log_puts(SDL_GetError());
-        return;
+        goto cleanup;
     }
 
     if (SDL_RWwrite(io, magic, 1, strlen(magic)) != strlen(magic) ||
@@ -4318,6 +4321,10 @@ void dump_map(char* path, Uint8* map)
     SDL_RWclose(io);
 
     log_print(log_line, "dumped to %s", path);
+
+cleanup:
+    SDL_free(ppm);
+    SDL_free(rgba);
 }
 
 void dump_vram()
