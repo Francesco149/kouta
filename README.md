@@ -1,10 +1,10 @@
 game boy emulator in c89
-
-![](https://i.imgur.com/oTs6J8j.png)
-![](https://i.imgur.com/RKCbznF.gif)
-
 at the moment it only runs tetris and the dmg bootrom and has no sound,
 but I'm gonna start working towards making it run pokemon
+
+![](https://i.imgur.com/cuw3Z9O.gif)
+![](https://i.imgur.com/TC5ViLl.png)
+![](https://i.imgur.com/4Ou7fGI.png)
 
 dependencies: SDL2
 
