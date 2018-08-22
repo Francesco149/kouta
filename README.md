@@ -3,9 +3,11 @@ game boy emulator in c89
 games tested:
 * Tetris -> playable
 * Wario Land: Super Mario Land 3 -> playable
+* The Legend of Zelda: Link's Awakening -> playable
 * Pokemon Red -> gets to the title screen and hangs, WIP
 
 ![](https://i.imgur.com/cuw3Z9O.gif)
+![](https://i.imgur.com/TiNooIR.png)
 ![](https://i.imgur.com/TC5ViLl.png)
 ![](https://i.imgur.com/4Ou7fGI.png)
 
