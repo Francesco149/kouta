@@ -748,6 +748,7 @@ int kt_load_rom(kouta_t* kt, char *path)
     switch (cart_info.type)
     {
     case KT_MBC1_RAM:
+    case KT_MBC1_RAM_BATTERY:
     case KT_MBC3_TIMER_RAM_BATTERY:
     case KT_MBC3_RAM:
     case KT_MBC3_RAM_BATTERY:
