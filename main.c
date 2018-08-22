@@ -3884,7 +3884,7 @@ void update_tilemap()
 #define RENDER_OBJ 0x80000000
 
 void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
-    int flags)
+    int flags, int screen_w, int screen_h)
 {
     int x, y;
 
@@ -3892,7 +3892,7 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
         return;
     }
 
-    if (l >= KT_WIDTH) {
+    if (l >= screen_w) {
         return;
     }
 
@@ -3900,7 +3900,7 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
         return;
     }
 
-    if (t >= KT_HEIGHT) {
+    if (t >= screen_h) {
         return;
     }
 
@@ -3923,15 +3923,15 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
             wrapy = t + y;
 
             if (wrap) {
-                wrapx %= KT_WIDTH;
-                wrapy %= KT_HEIGHT;
+                wrapx %= screen_w;
+                wrapy %= screen_h;
             }
 
-            else if (wrapx >= KT_WIDTH || wrapy >= KT_HEIGHT) {
+            else if (wrapx >= screen_w || wrapy >= screen_h) {
                 continue;
             }
 
-            pixel = &pix[wrapy * KT_WIDTH + wrapx];
+            pixel = &pix[wrapy * screen_w + wrapx];
 
             src_x = (flags & KT_OBJ_FLIP_X) ? 7 - x : x;
             src_y = (flags & KT_OBJ_FLIP_Y) ? 7 - y : y;
@@ -3949,7 +3949,8 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
     }
 }
 
-void render_map(int* pix, Uint8* map, Uint8 scx, Uint8 scy)
+void render_map(int* pix, Uint8* map, Uint8 scx, Uint8 scy,
+    int screen_w, int screen_h)
 {
     int x, y;
     Uint8* tiles;
@@ -3971,8 +3972,8 @@ void render_map(int* pix, Uint8* map, Uint8 scx, Uint8 scy)
 
     startx = SDL_max(0, scx / 8);
     starty = SDL_max(0, scy / 8);
-    endx = SDL_max(0, (scx + KT_WIDTH) / 8 + 1);
-    endy = SDL_max(0, (scy + KT_HEIGHT) / 8 + 1);
+    endx = SDL_max(0, (scx + screen_w) / 8 + 1);
+    endy = SDL_max(0, (scy + screen_h) / 8 + 1);
 
     for (y = starty; y < endy; ++y)
     {
@@ -3984,7 +3985,8 @@ void render_map(int* pix, Uint8* map, Uint8 scx, Uint8 scy)
             l = x * 8 - scx;
             t = y * 8 - scy;
             tile_index = (base_index + map[y * 32 + x]) % 0x100;
-            render_tile(pix, tiles, tile_index, l, t, 1, 0);
+            render_tile(pix, tiles, tile_index, l, t, 1, 0,
+                screen_w, screen_h);
         }
     }
 }
@@ -3999,7 +4001,7 @@ void render_background(int* pix)
         map = &kt.vram[0x1800];
     }
 
-    render_map(pix, map, kt.scx, kt.scy);
+    render_map(pix, map, kt.scx, kt.scy, KT_WIDTH, KT_HEIGHT);
 }
 
 void render_window(int* pix)
@@ -4014,11 +4016,12 @@ void render_window(int* pix)
             map = &kt.vram[0x1800];
         }
 
-        render_map(pix, map, kt.wx, kt.wy);
+        render_map(pix, map, kt.wx, kt.wy, KT_WIDTH, KT_HEIGHT);
     }
 }
 
-void render_obj(int* pix, int n, int flags_mask, int flags_match)
+void render_obj(int* pix, int n, int flags_mask, int flags_match,
+    int screen_w, int screen_h)
 {
     Uint8* data;
     int x, y;
@@ -4053,13 +4056,16 @@ void render_obj(int* pix, int n, int flags_mask, int flags_match)
             bottom = tmp;
         }
 
-        render_tile(pix, tilemap, top, x - 8, y - 16, 0, flags);
-        render_tile(pix, tilemap, bottom, x - 8, y - 8, 0, flags);
+        render_tile(pix, tilemap, top, x - 8, y - 16, 0, flags,
+            screen_w, screen_h);
+        render_tile(pix, tilemap, bottom, x - 8, y - 8, 0, flags,
+            screen_w, screen_h);
 
         return;
     }
 
-    render_tile(pix, tilemap, tile_index, x - 8, y - 16, 0, flags);
+    render_tile(pix, tilemap, tile_index, x - 8, y - 16, 0, flags,
+        screen_w, screen_h);
 }
 
 /*
@@ -4128,7 +4134,7 @@ void render_objs(int* pix, int flags_mask, int flags_match)
         for (i = 0; i < SDL_max(10, n_objs_by_row[row]); ++i)
         {
             render_obj(pix, objs_by_row[row * 40 + i], flags_mask,
-                flags_match);
+                flags_match, KT_WIDTH, KT_HEIGHT);
         }
     }
 }
@@ -4185,7 +4191,9 @@ void tick()
     }
 }
 
-void dump_vram()
+/* --------------------------------------------------------------------- */
+
+void dump_patterns()
 {
     Uint8* ppm;
     int i, j;
@@ -4233,6 +4241,80 @@ void dump_vram()
     SDL_RWclose(io);
 
     log_puts("dumped to patterns.ppm");
+}
+
+void rgba_to_ppm(int* rgba, Uint8* ppm, int w, int h)
+{
+    int i;
+
+    for (i = 0; i < w * h; ++i)
+    {
+        Uint8* pixel;
+
+        pixel = &ppm[i * 3];
+        pixel[0] = (rgba[i] & 0x00FF0000) >> 16;
+        pixel[1] = (rgba[i] & 0x0000FF00) >> 8;
+        pixel[2] = (rgba[i] & 0x000000FF) >> 0;
+    }
+}
+
+void dump_map(char* path, Uint8* map)
+{
+    int* rgba;
+    Uint8* ppm;
+    SDL_RWops* io;
+    char* magic = "P6 256 256 255\n";
+    size_t len;
+
+    len = 256 * 256 * 8 * 8;
+    rgba = SDL_malloc(len * sizeof(int));
+    ppm = SDL_malloc(len * 3);
+
+    if (!ppm || !rgba) {
+        log_puts(SDL_GetError());
+        return;
+    }
+
+    render_map(rgba, map, 0, 0, 256, 256);
+    rgba_to_ppm(rgba, ppm, 256, 256);
+
+    io = SDL_RWFromFile(path, "wb");
+    if (!io) {
+        log_puts(SDL_GetError());
+        return;
+    }
+
+    if (SDL_RWwrite(io, magic, 1, strlen(magic)) != strlen(magic) ||
+        SDL_RWwrite(io, ppm, 1, len) != len)
+    {
+        log_puts(SDL_GetError());
+    }
+
+    SDL_RWclose(io);
+
+    log_print(log_line, "dumped to %s", path);
+}
+
+void dump_vram()
+{
+    Uint8* bgmap;
+    Uint8* wmap;
+
+    if (kt.lcdc & KT_LCDC_BG_MAP) {
+        bgmap = &kt.vram[0x1C00];
+    } else {
+        bgmap = &kt.vram[0x1800];
+    }
+
+    if (kt.lcdc & KT_LCDC_WINDOW_MAP) {
+        wmap = &kt.vram[0x1C00];
+    } else {
+        wmap = &kt.vram[0x1800];
+    }
+
+    dump_patterns();
+    dump_map("background.ppm", bgmap);
+    dump_map("window.ppm", wmap);
 }
 
 /* --------------------------------------------------------------------- */
