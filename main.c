@@ -4143,7 +4143,7 @@ void update_obj_list()
      * (objects with lower x appear above ones with higher x)
      */
 
-    for (row = 0; row < KT_HEIGHT; ++row)
+    for (row = 0; row < KT_HEIGHT + 16; ++row)
     {
         SDL_qsort(&objs_by_row[row * 40], n_objs_by_row[row],
             sizeof(int), compar_objs);
@@ -4155,7 +4155,7 @@ void render_objs(int* pix, int flags_mask, int flags_match)
     int i;
     int row;
 
-    for (row = 0; row < KT_HEIGHT; ++row)
+    for (row = 0; row < KT_HEIGHT + 16; ++row)
     {
         for (i = 0; i < SDL_max(10, n_objs_by_row[row]); ++i)
         {
