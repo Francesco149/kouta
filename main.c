@@ -3888,10 +3888,11 @@ void update_tilemap()
     }
 }
 
-#define RENDER_OBJ 0x80000000
+#define RENDER_OBJ  0x80000000
+#define RENDER_WRAP 0x40000000
 
-void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
-    int flags, int screen_w, int screen_h)
+void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int flags,
+    int screen_w, int screen_h)
 {
     int x, y;
 
@@ -3903,7 +3904,7 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
         return;
     }
 
-    if (wrap) {
+    if (flags & RENDER_WRAP) {
         l %= screen_w;
         t %= screen_h;
     }
@@ -3934,7 +3935,7 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
             wrapx = l + x;
             wrapy = t + y;
 
-            if (wrap) {
+            if (flags & RENDER_WRAP) {
                 wrapx %= screen_w;
                 wrapy %= screen_h;
             }
@@ -3962,7 +3963,7 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
 }
 
 void render_map(int* pix, Uint8* map, int scx, int scy,
-    int screen_w, int screen_h, int wrap)
+    int screen_w, int screen_h, int flags)
 {
     int x, y;
     Uint8* tiles;
@@ -4000,7 +4001,7 @@ void render_map(int* pix, Uint8* map, int scx, int scy,
             tile_index = (base_index + map[(y % 32) * 32 + (x % 32)]);
             tile_index %= 0x100;
 
-            render_tile(pix, tiles, tile_index, l, t, wrap, 0,
+            render_tile(pix, tiles, tile_index, l, t, flags,
                 screen_w, screen_h);
         }
     }
@@ -4018,7 +4019,8 @@ void render_background(int* pix)
             map = &kt.vram[0x1800];
         }
 
-        render_map(pix, map, kt.scx, kt.scy, KT_WIDTH, KT_HEIGHT, 1);
+        render_map(pix, map, kt.scx, kt.scy, KT_WIDTH, KT_HEIGHT,
+            RENDER_WRAP);
     }
 }
 
@@ -4078,15 +4080,15 @@ void render_obj(int* pix, int n, int flags_mask, int flags_match,
             bottom = tmp;
         }
 
-        render_tile(pix, tilemap, top, x - 8, y - 16, 0, flags,
+        render_tile(pix, tilemap, top, x - 8, y - 16, flags,
             screen_w, screen_h);
-        render_tile(pix, tilemap, bottom, x - 8, y - 8, 0, flags,
+        render_tile(pix, tilemap, bottom, x - 8, y - 8, flags,
             screen_w, screen_h);
 
         return;
     }
 
-    render_tile(pix, tilemap, tile_index, x - 8, y - 16, 0, flags,
+    render_tile(pix, tilemap, tile_index, x - 8, y - 16, flags,
         screen_w, screen_h);
 }
 
@@ -4298,7 +4300,7 @@ void dump_map(char* path, Uint8* map)
     }
 
     SDL_memset(rgba, 255, len * 4);
-    render_map(rgba, map, 0, 0, 256, 256, 1);
+    render_map(rgba, map, 0, 0, 256, 256, RENDER_WRAP);
     rgba_to_ppm(rgba, ppm, 256, 256);
 
     io = SDL_RWFromFile(path, "wb");
