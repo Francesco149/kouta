@@ -4185,6 +4185,56 @@ void tick()
     }
 }
 
+void dump_vram()
+{
+    Uint8* ppm;
+    int i, j;
+    SDL_RWops* io;
+    char* magic = "P6 192 128 255\n";
+    size_t len;
+
+    len = 384 * 8 * 8 * 3;
+    ppm = SDL_malloc(len);
+    if (!ppm) {
+        log_puts(SDL_GetError());
+        return;
+    }
+
+    for (i = 0; i < 384; ++i)
+    {
+        for (j = 0; j < 8 * 8; ++j)
+        {
+            int x, y;
+            int color;
+            Uint8* pixel;
+
+            x = (j % 8) + (i % 24) * 8;
+            y = (j / 8) + (i / 24) * 8;
+            color = dmg_palette[bgp(tilemap[i * 8 * 8 + j])];
+            pixel = &ppm[(y * 24 * 8 + x) * 3];
+            pixel[0] = (color & 0x00FF0000) >> 16;
+            pixel[1] = (color & 0x0000FF00) >> 8;
+            pixel[2] = (color & 0x000000FF) >> 0;
+        }
+    }
+
+    io = SDL_RWFromFile("patterns.ppm", "wb");
+    if (!io) {
+        log_puts(SDL_GetError());
+        return;
+    }
+
+    if (SDL_RWwrite(io, magic, 1, strlen(magic)) != strlen(magic) ||
+        SDL_RWwrite(io, ppm, 1, len) != len)
+    {
+        log_puts(SDL_GetError());
+    }
+
+    SDL_RWclose(io);
+
+    log_puts("dumped to patterns.ppm");
+}
+
 /* --------------------------------------------------------------------- */
 
 void handle(SDL_Event* e)
@@ -4232,6 +4282,9 @@ void handle(SDL_Event* e)
         case SDLK_SPACE:
             fast_fwd = 1;
             log_dump("d", fast_fwd);
+            break;
+        case SDLK_F6:
+            dump_vram();
             break;
         }
         break;
