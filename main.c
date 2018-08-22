@@ -3933,8 +3933,8 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
 
             pixel = &pix[wrapy * KT_WIDTH + wrapx];
 
-            src_x = (flags & KT_OBJ_FLIP_X) ? 8 - x : x;
-            src_y = (flags & KT_OBJ_FLIP_Y) ? 8 - y : y;
+            src_x = (flags & KT_OBJ_FLIP_X) ? 7 - x : x;
+            src_y = (flags & KT_OBJ_FLIP_Y) ? 7 - y : y;
             color = tiles[n * 8 * 8 + src_y * 8 + src_x];
 
             if (color)
