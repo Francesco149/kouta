@@ -4275,6 +4275,7 @@ void dump_map(char* path, Uint8* map)
         return;
     }
 
+    SDL_memset(rgba, 255, len * 4);
     render_map(rgba, map, 0, 0, 256, 256);
     rgba_to_ppm(rgba, ppm, 256, 256);
 
