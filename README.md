@@ -1,6 +1,9 @@
 game boy emulator in c89
-at the moment it only runs tetris and the dmg bootrom and has no sound,
-but I'm gonna start working towards making it run pokemon
+
+games tested:
+* Tetris -> playable
+* Wario Land: Super Mario Land 3 -> playable
+* Pokemon Red -> gets to the title screen and hangs, WIP
 
 ![](https://i.imgur.com/cuw3Z9O.gif)
 ![](https://i.imgur.com/TC5ViLl.png)
