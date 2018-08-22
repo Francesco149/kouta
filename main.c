@@ -3422,6 +3422,13 @@ void kt_update_lcd(kouta_t* kt, int n_cycles)
     kt->entered_vblank = 0;
     kt->n_lcd_cycles += n_cycles;
 
+    if (!(kt->lcdc & KT_LCDC_ENABLE)) {
+        kt->stat &= ~KT_STAT_MODE_BITS;
+        kt->stat |= KT_STAT_HBLANK;
+        kt->n_lcd_cycles = 0;
+        return;
+    }
+
     switch (kt->stat & KT_STAT_MODE_BITS)
     {
     case KT_STAT_HBLANK:
