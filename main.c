@@ -4018,13 +4018,17 @@ void render_window(int* pix)
 
     if (kt.lcdc & KT_LCDC_WINDOW_ENABLE)
     {
+        if (kt.wx >= KT_WIDTH + 7 || kt.wy >= KT_HEIGHT) {
+            return;
+        }
+
         if (kt.lcdc & KT_LCDC_WINDOW_MAP) {
             map = &kt.vram[0x1C00];
         } else {
             map = &kt.vram[0x1800];
         }
 
-        render_map(pix, map, kt.wx, kt.wy, KT_WIDTH, KT_HEIGHT);
+        render_map(pix, map, -kt.wx + 7, -kt.wy, KT_WIDTH, KT_HEIGHT);
     }
 }
 
