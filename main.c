@@ -3899,11 +3899,16 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int wrap,
         return;
     }
 
-    if (l >= screen_w) {
+    if (t + 8 <= 0) {
         return;
     }
 
-    if (t + 8 <= 0) {
+    if (wrap) {
+        l %= screen_w;
+        t %= screen_h;
+    }
+
+    if (l >= screen_w) {
         return;
     }
 
