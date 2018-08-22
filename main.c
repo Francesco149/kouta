@@ -3888,8 +3888,9 @@ void update_tilemap()
     }
 }
 
-#define RENDER_OBJ  0x80000000
-#define RENDER_WRAP 0x40000000
+#define RENDER_OBJ             0x80000000
+#define RENDER_WRAP            0x40000000
+#define RENDER_NO_TRANSPARENCY 0x20000000
 
 void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int flags,
     int screen_w, int screen_h)
@@ -3950,7 +3951,7 @@ void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int flags,
             src_y = (flags & KT_OBJ_FLIP_Y) ? 7 - y : y;
             color = tiles[n * 8 * 8 + src_y * 8 + src_x];
 
-            if (color)
+            if ((flags & RENDER_NO_TRANSPARENCY) || color)
             {
                 if (flags & RENDER_OBJ) {
                     *pixel = dmg_palette[obp(color, flags)];
@@ -4040,7 +4041,8 @@ void render_window(int* pix)
             map = &kt.vram[0x1800];
         }
 
-        render_map(pix, map, -kt.wx + 7, -kt.wy, KT_WIDTH, KT_HEIGHT, 0);
+        render_map(pix, map, -kt.wx + 7, -kt.wy, KT_WIDTH, KT_HEIGHT,
+            RENDER_NO_TRANSPARENCY);
     }
 }
 
