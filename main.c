@@ -2496,7 +2496,7 @@ Uint8 kt_rlc8(kouta_t* kt, Uint8 value)
     }
 
     kt->regs[KT_AF >> 4] &= 0xFF00;
-    kt_set_flag(kt, KT_CARRY, old & 1);
+    kt_set_flag(kt, KT_CARRY, old & 0x80);
     kt_set_flag(kt, KT_ZERO, !value);
 
     return value;
