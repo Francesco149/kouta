@@ -2360,7 +2360,6 @@ void kt_rra(kouta_t* kt, kt_op_t* instruction)
 
     kt->regs[KT_AF >> 4] = 0;
     kt_set_flag(kt, KT_CARRY, old_value & 1);
-    kt_set_flag(kt, KT_ZERO, !value);
     kt_set_a(kt, value);
 }
 
@@ -2496,6 +2495,7 @@ Uint8 kt_rlc8(kouta_t* kt, Uint8 value)
 
     kt->regs[KT_AF >> 4] &= 0xFF00;
     kt_set_flag(kt, KT_CARRY, old & 0x80);
+    kt_set_flag(kt, KT_ZERO, !value);
 
     return value;
 }
@@ -2541,7 +2541,6 @@ void kt_rlca(kouta_t* kt, kt_op_t* instruction)
 
     kt->regs[KT_AF >> 4] = 0;
     kt_set_flag(kt, KT_CARRY, old_value & 0x80);
-    kt_set_flag(kt, KT_ZERO, !value);
     kt_set_a(kt, value);
 }
 
