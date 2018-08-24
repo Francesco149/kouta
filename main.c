@@ -3699,20 +3699,29 @@ void r_begin(int** pix)
     SDL_LockTexture(r_texture, 0, (void**)pix, &pitch);
 }
 
-void r_end()
+void r_end(int** pix)
 {
     SDL_UnlockTexture(r_texture);
+    *pix = 0;
+}
+
+void r_swap()
+{
     SDL_RenderCopyEx(r_renderer, r_texture, 0, 0, 0, 0, SDL_FLIP_NONE);
     SDL_RenderPresent(r_renderer);
 }
 
-void r_clear(int* pix, int color)
+void r_clear(int color)
 {
-    int i;
+    SDL_SetRenderDrawColor(
+        r_renderer,
+        (color & 0x00FF0000) >> 16,
+        (color & 0x0000FF00) >> 8,
+        (color & 0x000000FF) >> 0,
+        SDL_ALPHA_OPAQUE
+    );
 
-    for (i = 0; i < KT_WIDTH * KT_HEIGHT; ++i) {
-        *pix++ = color;
-    }
+    SDL_RenderClear(r_renderer);
 }
 
 /* --------------------------------------------------------------------- */
@@ -3743,17 +3752,7 @@ int dmg_grayscale_palette[] = {
 };
 
 int* dmg_palette = dmg_grayscale_palette;
-
-/*
- * all the tile patterns, expanded to 1 byte per pixel
- *
- * laid out like:
- * tile0_row0 tile0_row1 tile0_row2 ... tile1_row0 tile1_row1 ...
- */
-Uint8 tilemap[8 * 8 * 786];
-
-int objs_by_row[(KT_HEIGHT + 16) * 40];
-int n_objs_by_row[KT_HEIGHT + 16];
+int* pix;
 
 void print_usage(char* argv0)
 {
@@ -3879,161 +3878,141 @@ int obp(int color, int flags)
     return (palette & mask) >> (color * 2);
 }
 
-void update_tilemap()
+int tile_pixel(int n, int x, int y)
 {
+    int color;
     Uint8* data;
-    Uint8* tile;
-    int i, x, y;
+    int msb, lsb;
 
     if (kt.mode != KT_DMG_MODE) {
         log_puts("unimplemented rendering mode");
         exit(1);
     }
 
-    for (i = 0; i < 384; ++i)
-    {
-        tile = &tilemap[i * 8 * 8];
-
-        for (y = 0; y < 8; ++y)
-        {
-            data = &kt.vram[i * 16 + y * 2];
-
-            for (x = 0; x < 8; ++x)
-            {
-                int msb, lsb;
-                Uint8 color;
-
-                lsb = data[0] & (1 << (7 - x));
-                msb = data[1] & (1 << (7 - x));
-
-                color = 0;
-                if (lsb) color |= 1;
-                if (msb) color |= 2;
-
-                tile[y * 8 + x] = color;
-            }
-        }
+    if (x < 0 || x >= 8) {
+        log_dump("d", x);
+        return 0;
     }
+
+    if (y < 0 || y >= 8) {
+        log_dump("d", y);
+        return 0;
+    }
+
+    data = &kt.vram[n * 16 + y * 2];
+    lsb = data[0] & (1 << (7 - x));
+    msb = data[1] & (1 << (7 - x));
+
+    color = 0;
+    if (lsb) color |= 1;
+    if (msb) color |= 2;
+
+    return color;
 }
 
 #define RENDER_OBJ             0x80000000
 #define RENDER_WRAP            0x40000000
 #define RENDER_NO_TRANSPARENCY 0x20000000
 
-void wrap_coords(int* x, int* y, int stepx, int stepy, int w, int h)
+void render_tile(int* pix, int ly, int line, int n, int l, int flags,
+    int screen_w)
 {
-    for (; *x >= w; *x -= stepx);
-    for (; *y >= h; *y -= stepy);
-}
-
-void render_tile(int* pix, Uint8* tiles, int n, int l, int t, int flags,
-    int screen_w, int screen_h)
-{
-    int x, y;
+    int x;
+    int src_y;
 
     if (flags & RENDER_WRAP) {
-        wrap_coords(&l, &t, 256, 256, screen_w, screen_h);
+        for (; l >= screen_w; l -= 256);
     }
 
-    if (l + 8 <= 0 || t + 8 <= 0 || l >= screen_w || t >= screen_h) {
+    if (l >= screen_w || l + 8 <= 0) {
         return;
     }
 
-    /*
-     * NOTE: the bound checks aren't necessary for objs because the sorting
-     * step already discards off-screen sprites, so performance could be
-     * gained by getting rid of checks here
-     */
+    src_y = (flags & KT_OBJ_FLIP_Y) ? 7 - line : line;
 
-    for (y = SDL_max(-t, 0) % 8; y < 8; ++y)
+    for (x = SDL_max(-l, 0) % 8; x < 8; ++x)
     {
-        for (x = SDL_max(-l, 0) % 8; x < 8; ++x)
+        int* pixel;
+        int wrapx;
+        int color;
+        int src_x;
+
+        wrapx = l + x;
+
+        if (flags & RENDER_WRAP) {
+            for (; wrapx >= screen_w; wrapx -= 256);
+        }
+
+        if (wrapx >= screen_w || wrapx < 0) {
+            continue;
+        }
+
+        pixel = &pix[ly * screen_w + wrapx];
+
+        src_x = (flags & KT_OBJ_FLIP_X) ? 7 - x : x;
+        color = tile_pixel(n, src_x, src_y);
+
+        if ((flags & RENDER_NO_TRANSPARENCY) || color)
         {
-            int* pixel;
-            int wrapx, wrapy;
-            int color;
-            int src_x, src_y;
-
-            wrapx = l + x;
-            wrapy = t + y;
-
-            if (flags & RENDER_WRAP)
-            {
-                wrap_coords(&wrapx, &wrapy, 256, 256, screen_w, screen_h);
-
-                if (wrapx < 0 || wrapy < 0) {
-                    continue;
-                }
-            }
-
-            else if (wrapx >= screen_w || wrapy >= screen_h) {
-                continue;
-            }
-
-            pixel = &pix[wrapy * screen_w + wrapx];
-
-            src_x = (flags & KT_OBJ_FLIP_X) ? 7 - x : x;
-            src_y = (flags & KT_OBJ_FLIP_Y) ? 7 - y : y;
-            color = tiles[n * 8 * 8 + src_y * 8 + src_x];
-
-            if ((flags & RENDER_NO_TRANSPARENCY) || color)
-            {
-                if (flags & RENDER_OBJ) {
-                    *pixel = dmg_palette[obp(color, flags)];
-                } else {
-                    *pixel = dmg_palette[bgp(color)];
-                }
+            if (flags & RENDER_OBJ) {
+                *pixel = dmg_palette[obp(color, flags)];
+            } else {
+                *pixel = dmg_palette[bgp(color)];
             }
         }
     }
 }
 
-void render_map(int* pix, Uint8* map, int scx, int scy,
-    int screen_w, int screen_h, int flags)
+void render_map(int* pix, int ly, Uint8* map, int scx, int scy,
+    int screen_w, int flags)
 {
     int x, y;
-    Uint8* tiles;
     int base_index;
-    int starty, startx;
-    int endy, endx;
+    int startx, endx;
+    int tile_line;
+    int map_pixel_y;
 
     if (kt.lcdc & KT_LCDC_TILES) {
         /* 0-127 from 8000-87FF */
         /* 128-255 from 8800-8FFF */
         base_index = 0;
-        tiles = tilemap;
     } else {
         /* 0-127 from 9000-97FF */
         /* 128-255 from 8800-8FFF */
         base_index = 128;
-        tiles = &tilemap[128 * 8 * 8];
     }
 
     startx = SDL_max(0, scx / 8);
-    starty = SDL_max(0, scy / 8);
     endx = SDL_max(0, (scx + screen_w) / 8 + 1);
-    endy = SDL_max(0, (scy + screen_h) / 8 + 1);
+    map_pixel_y = scy + ly;
 
-    for (y = starty; y < endy; ++y)
+    if (!(flags & RENDER_WRAP) && map_pixel_y >= screen_w) {
+        return;
+    }
+
+    if (map_pixel_y < 0) {
+        return;
+    }
+
+    y = map_pixel_y / 8;
+    tile_line = ly + scy - y * 8;
+
+    for (x = startx; x < endx; ++x)
     {
-        for (x = startx; x < endx; ++x)
-        {
-            int l, t;
-            int tile_index;
+        int l;
+        int tile_index;
 
-            l = x * 8 - scx;
-            t = y * 8 - scy;
+        l = x * 8 - scx;
 
-            tile_index = (base_index + map[(y % 32) * 32 + (x % 32)]);
-            tile_index %= 0x100;
+        tile_index = base_index + map[(y % 32) * 32 + (x % 32)];
+        tile_index &= 0xFF;
+        tile_index += base_index;
 
-            render_tile(pix, tiles, tile_index, l, t, flags,
-                screen_w, screen_h);
-        }
+        render_tile(pix, ly, tile_line, tile_index, l, flags, screen_w);
     }
 }
 
-void render_background(int* pix)
+void render_background(int* pix, int ly)
 {
     Uint8* map;
 
@@ -4045,12 +4024,11 @@ void render_background(int* pix)
             map = &kt.vram[0x1800];
         }
 
-        render_map(pix, map, kt.scx, kt.scy, KT_WIDTH, KT_HEIGHT,
-            RENDER_WRAP);
+        render_map(pix, ly, map, kt.scx, kt.scy, KT_WIDTH, RENDER_WRAP);
     }
 }
 
-void render_window(int* pix)
+void render_window(int* pix, int ly)
 {
     Uint8* map;
 
@@ -4066,18 +4044,19 @@ void render_window(int* pix)
             map = &kt.vram[0x1800];
         }
 
-        render_map(pix, map, -kt.wx + 7, -kt.wy, KT_WIDTH, KT_HEIGHT,
+        render_map(pix, ly, map, -kt.wx + 7, -kt.wy, KT_WIDTH,
             RENDER_NO_TRANSPARENCY);
     }
 }
 
-void render_obj(int* pix, int n, int flags_mask, int flags_match,
-    int screen_w, int screen_h)
+void render_obj(int* pix, int ly, int n, int flags_mask, int flags_match,
+    int screen_w)
 {
     Uint8* data;
     int x, y;
     int tile_index;
     int flags;
+    int tile_line;
 
     data = &kt.oam[n * 4];
     y = data[0];
@@ -4093,36 +4072,22 @@ void render_obj(int* pix, int n, int flags_mask, int flags_match,
 
     if (kt.lcdc & KT_LCDC_OBJ_8x16)
     {
-        int top, bottom;
-
-        top = tile_index & (~1);
-        bottom = tile_index | 1;
-
-        if (flags & KT_OBJ_FLIP_Y)
-        {
-            int tmp;
-
-            tmp = top;
-            top = bottom;
-            bottom = tmp;
+        if (ly - 16 - y >= 8) {
+            tile_index |= 1;
+        } else {
+            tile_index &= ~1;
         }
 
-        render_tile(pix, tilemap, top, x - 8, y - 16, flags,
-            screen_w, screen_h);
-        render_tile(pix, tilemap, bottom, x - 8, y - 8, flags,
-            screen_w, screen_h);
-
-        return;
+        if (flags & KT_OBJ_FLIP_Y) {
+            tile_index ^= 1;
+        }
     }
 
-    render_tile(pix, tilemap, tile_index, x - 8, y - 16, flags,
-        screen_w, screen_h);
+    tile_line = ly - y + 16;
+
+    render_tile(pix, ly, tile_line, tile_index, x - 8, flags, screen_w);
 }
 
-/*
- * to emulate the gameboy's 10 object limit with z priority for the
- * leftmost objects we need to sort by x descending
- */
 int compar_objs(void const* p1, void const* p2)
 {
     int left, right;
@@ -4137,14 +4102,25 @@ int compar_objs(void const* p1, void const* p2)
     return (int)rx - (int)lx;
 }
 
-void update_obj_list()
+/*
+ * get at most 10 objects that intersect ly, sorted by x descending
+ * this is required to give priority to the leftmost objects
+ * (objects with lower x appear above ones with higher x)
+ * the 10 object limit is emulating a hardware limitation of the gb
+ * (returns n_objs)
+ */
+int sorted_objs(int* objs, int ly)
 {
     int i;
-    int row;
+    int n_objs = 0;
+    int obj_h;
 
-    memset(n_objs_by_row, 0, sizeof(n_objs_by_row));
+    if (kt.lcdc & KT_LCDC_OBJ_8x16) {
+        obj_h = 16;
+    } else {
+        obj_h = 8;
+    }
 
-    /* map objects by row */
     for (i = 0; i < 40; ++i)
     {
         Uint8* data;
@@ -4159,62 +4135,59 @@ void update_obj_list()
             continue;
         }
 
-        objs_by_row[y * 40 + n_objs_by_row[y]++] = i;
+        if (ly < y - 16 || ly >= y - 16 + obj_h) {
+            continue;
+        }
+
+        objs[n_objs++] = i;
     }
 
-    /*
-     * sort every row by x descending and take up to 10 objs
-     * this is required to give priority to the leftmost objects
-     * (objects with lower x appear above ones with higher x)
-     */
+    SDL_qsort(objs, n_objs, sizeof(int), compar_objs);
 
-    for (row = 0; row < KT_HEIGHT + 16; ++row)
-    {
-        SDL_qsort(&objs_by_row[row * 40], n_objs_by_row[row],
-            sizeof(int), compar_objs);
-    }
+    return SDL_min(10, n_objs);
 }
 
-void render_objs(int* pix, int flags_mask, int flags_match)
+void render_objs(int* pix, int ly, int* objs, int n_objs,
+    int flags_mask, int flags_match)
 {
     int i;
-    int row;
 
-    for (row = 0; row < KT_HEIGHT + 16; ++row)
-    {
-        for (i = 0; i < SDL_max(10, n_objs_by_row[row]); ++i)
-        {
-            render_obj(pix, objs_by_row[row * 40 + i], flags_mask,
-                flags_match, KT_WIDTH, KT_HEIGHT);
-        }
+    for (i = 0; i < n_objs; ++i) {
+        render_obj(pix, ly, objs[i], flags_mask, flags_match, KT_WIDTH);
     }
 }
 
-void render()
+void clear_line(int* pix, int y, int color)
 {
-    int* pix;
+    int i;
 
-    update_tilemap();
-    update_obj_list();
-
-    r_begin(&pix);
-    r_clear(pix, dmg_palette[bgp(0)]);
-    render_objs(pix, KT_OBJ_BEHIND, KT_OBJ_BEHIND);
-    render_background(pix);
-    render_window(pix);
-    render_objs(pix, KT_OBJ_BEHIND, 0);
-    r_end();
-
-    ++frames_per_second;
+    pix += KT_WIDTH * y;
+    for (i = 0; i < KT_WIDTH; pix[i++] = color);
 }
 
-void render_blank()
+void render_scanline()
 {
-    int* pix;
+    int objs[40];
+    int n_objs;
+    int ly;
 
-    r_begin(&pix);
-    r_clear(pix, dmg_palette[0]);
-    r_end();
+    if (!kt.ly || kt.ly > KT_HEIGHT) {
+        return;
+    }
+
+    ly = kt.ly - 1;
+
+    n_objs = sorted_objs(objs, ly);
+
+    if (!pix) {
+        r_begin(&pix);
+    }
+
+    clear_line(pix, ly, dmg_palette[bgp(0)]);
+    render_objs(pix, ly, objs, n_objs, KT_OBJ_BEHIND, KT_OBJ_BEHIND);
+    render_background(pix, ly);
+    render_window(pix, ly);
+    render_objs(pix, ly, objs, n_objs, KT_OBJ_BEHIND, 0);
 }
 
 void tick()
@@ -4225,14 +4198,24 @@ void tick()
     frame_cycles += delta_cycles;
     cycles_per_second += delta_cycles;
 
-    if (kt.entered_vblank) {
-        render();
+    if (kt.ly < prev_ly)
+    {
+        if (pix) {
+            r_end(&pix);
+        }
+
+        r_swap();
+        ++frames_per_second;
     }
 
     else if (!(kt.lcdc & KT_LCDC_ENABLE) &&
         (kt.n_cycles % (kt.cycles_per_second / 60)) == 0)
     {
-        render_blank();
+        r_clear(dmg_palette[0]);
+    }
+
+    if (kt.ly != prev_ly) {
+        render_scanline();
     }
 
     prev_ly = kt.ly;
@@ -4264,12 +4247,14 @@ void dump_patterns()
         for (j = 0; j < 8 * 8; ++j)
         {
             int x, y;
+            int gbcolor;
             int color;
             Uint8* pixel;
 
             x = (j % 8) + (i % 24) * 8;
             y = (j / 8) + (i / 24) * 8;
-            color = dmg_palette[bgp(tilemap[i * 8 * 8 + j])];
+            gbcolor = tile_pixel(i, j % 8, j / 8);
+            color = dmg_palette[bgp(gbcolor)];
             pixel = &ppm[(y * 24 * 8 + x) * 3];
             pixel[0] = (color & 0x00FF0000) >> 16;
             pixel[1] = (color & 0x0000FF00) >> 8;
@@ -4312,15 +4297,19 @@ void rgba_to_ppm(int* rgba, Uint8* ppm, int w, int h)
     }
 }
 
-void dump_map(char* path, Uint8* map)
+void dump_map(char* path, Uint8* map, int scx, int scy, int w, int h,
+    int flags)
 {
     int* rgba;
     Uint8* ppm;
     SDL_RWops* io;
-    char* magic = "P6 256 256 255\n";
+    char magic[32];
     size_t len;
+    int i;
 
-    len = 256 * 256 * 8 * 8;
+    sys_snprintf(magic, 32, "P6 %d %d 255\n", w, h);
+
+    len = w * h * 8 * 8;
     rgba = SDL_malloc(len * sizeof(int));
     ppm = SDL_malloc(len * 3);
 
@@ -4330,8 +4319,12 @@ void dump_map(char* path, Uint8* map)
     }
 
     SDL_memset(rgba, 255, len * 4);
-    render_map(rgba, map, 0, 0, 256, 256, RENDER_WRAP);
-    rgba_to_ppm(rgba, ppm, 256, 256);
+
+    for (i = 0; i < h; ++i) {
+        render_map(rgba, i, map, scx, scy, w, flags);
+    }
+
+    rgba_to_ppm(rgba, ppm, w, h);
 
     io = SDL_RWFromFile(path, "wb");
     if (!io) {
@@ -4372,8 +4365,12 @@ void dump_vram()
     }
 
     dump_patterns();
-    dump_map("background.ppm", bgmap);
-    dump_map("window.ppm", wmap);
+    dump_map("background.ppm", bgmap, 0, 0, 256, 256, RENDER_WRAP);
+    dump_map("window.ppm", wmap, 0, 0, 256, 256, RENDER_WRAP);
+    dump_map("frame_bg.ppm", bgmap, kt.scx, kt.scy,
+        KT_WIDTH, KT_HEIGHT, RENDER_WRAP);
+    dump_map("frame_wnd.ppm", wmap, -kt.wx + 7, -kt.wy,
+        KT_WIDTH, KT_HEIGHT, 0);
 }
 
 /* --------------------------------------------------------------------- */
