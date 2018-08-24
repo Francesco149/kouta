@@ -3504,7 +3504,14 @@ void kt_update_lcd(kouta_t* kt, int n_cycles)
 
 int kt_check_interrupt(kouta_t* kt, int interrupt, Uint16 vector)
 {
-    if (!(kt->ie & interrupt) || !(kt->if_ & interrupt)) {
+    if (!(kt->if_ & interrupt)) {
+        return 0;
+    }
+
+    /* if interrupts are disabled we un-halt without servicing them */
+    kt->halt = 0;
+
+    if (!kt->ime || !(kt->ie & interrupt)) {
         return 0;
     }
 
@@ -3533,14 +3540,11 @@ void kt_update_interrupts(kouta_t* kt)
         kt->ime_events &= ~KT_IME_EI;
     }
 
-    if (kt->ime)
-    {
-        if (kt_check_interrupt(kt, KT_INT_VBLANK, 0x40)) return;
-        if (kt_check_interrupt(kt, KT_INT_STAT, 0x48)) return;
-        if (kt_check_interrupt(kt, KT_INT_TIMER, 0x50)) return;
-        if (kt_check_interrupt(kt, KT_INT_SERIAL, 0x58)) return;
-        if (kt_check_interrupt(kt, KT_INT_JOYPAD, 0x60)) return;
-    }
+    if (kt_check_interrupt(kt, KT_INT_VBLANK, 0x40)) return;
+    if (kt_check_interrupt(kt, KT_INT_STAT, 0x48)) return;
+    if (kt_check_interrupt(kt, KT_INT_TIMER, 0x50)) return;
+    if (kt_check_interrupt(kt, KT_INT_SERIAL, 0x58)) return;
+    if (kt_check_interrupt(kt, KT_INT_JOYPAD, 0x60)) return;
 }
 
 void kt_update_dma(kouta_t* kt, int delta_cycles)
