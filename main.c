@@ -2965,7 +2965,7 @@ kt_op_t kt_op_table[512] = {
     { 0xE4, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xE5, "PUSH", KT_REG, KT_HL, 0, 0, kt_push_reg16, 1, 16 },
     { 0xE6, "AND", KT_IMM8, 0, 0, 0, kt_and_imm8, 2, 8 },
-    { 0xE7, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xE7, "RST", KT_LOMEM, 0x20, 0, 0, kt_rst_lomem, 1, 16 },
     { 0xE8, "ADD", KT_REG, KT_SP, KT_SIMM8, 0, kt_add_sp_simm8, 2, 16 },
     { 0xE9, "JP", KT_REG_IND, KT_HL, 0, 0, kt_jp_hl_ind, 1, 4 },
     { 0xEA, "LD", KT_IMM16_IND, 0, KT_REG, KT_A,
