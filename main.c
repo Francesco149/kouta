@@ -4069,10 +4069,11 @@ void render_obj(int* pix, int ly, int n, int flags_mask, int flags_match,
     }
 
     flags |= RENDER_OBJ;
+    tile_line = ly - y + 16;
 
     if (kt.lcdc & KT_LCDC_OBJ_8x16)
     {
-        if (ly - 16 - y >= 8) {
+        if (tile_line >= 8) {
             tile_index |= 1;
         } else {
             tile_index &= ~1;
@@ -4081,9 +4082,9 @@ void render_obj(int* pix, int ly, int n, int flags_mask, int flags_match,
         if (flags & KT_OBJ_FLIP_Y) {
             tile_index ^= 1;
         }
-    }
 
-    tile_line = ly - y + 16;
+        tile_line %= 8;
+    }
 
     render_tile(pix, ly, tile_line, tile_index, x - 8, flags, screen_w);
 }
