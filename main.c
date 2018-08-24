@@ -516,6 +516,7 @@ struct kouta
     Uint64 n_cycles;
     int entered_vblank;
     int halt;
+    int halt_bug;
     int stop;
     int error;
     int disable_dmg_rom;
@@ -1164,7 +1165,12 @@ void kt_nop(kouta_t* kt, kt_op_t* instruction)
 void kt_halt(kouta_t* kt, kt_op_t* instruction)
 {
     (void)instruction;
-    kt->halt = 1;
+
+    if (!kt->ime && kt->if_) {
+        kt->halt_bug = 1;
+    } else {
+        kt->halt = 1;
+    }
 }
 
 void kt_stop(kouta_t* kt, kt_op_t* instruction)
@@ -3604,7 +3610,17 @@ int kt_tick(kouta_t* kt)
 
     if (!kt->error)
     {
-        kt->pc += instruction->size;
+        /*
+         * emulate halt bug: if halting without interrupts enabled
+         * and pending interrupts, the next instruction is executed twice
+         */
+
+        if (kt->halt_bug) {
+            kt->halt_bug = 0;
+        } else {
+            kt->pc += instruction->size;
+        }
+
         kt->n_cycles += instruction->n_cycles;
 
         if (instruction->n_cycles <= 0 || instruction->size <= 0) {
