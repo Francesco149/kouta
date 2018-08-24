@@ -3608,8 +3608,11 @@ int kt_tick(kouta_t* kt)
 
     instruction->execute(kt, instruction);
 
-    if (!kt->error)
-    {
+    if (kt->error) {
+        kt_print_regs(kt);
+        kt_print_instruction(buf, sizeof(buf), kt, instruction);
+        SDL_Log("%s", buf);
+    } else {
         /*
          * emulate halt bug: if halting without interrupts enabled
          * and pending interrupts, the next instruction is executed twice
@@ -3629,13 +3632,6 @@ int kt_tick(kouta_t* kt)
             log_dump("d", instruction->size);
             kt->error = 1;
         }
-    }
-
-    if (kt->error)
-    {
-        kt_print_regs(kt);
-        kt_print_instruction(buf, sizeof(buf), kt, instruction);
-        SDL_Log("%s", buf);
     }
 
 skip_instruction:
