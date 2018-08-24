@@ -2955,7 +2955,7 @@ kt_op_t kt_op_table[512] = {
     { 0xDC, "CALL C", KT_IMM16, 0, 0, 0, kt_call_c_imm16, 3, 12 },
     { 0xDD, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
     { 0xDE, "SBC", KT_REG, KT_A, KT_IMM8, 0, kt_sbc_a_imm8, 2, 8 },
-    { 0xDF, "UNIMPLEMENTED", 0, 0, 0, 0, kt_unimplemented, 1, 0 },
+    { 0xDF, "RST", KT_LOMEM, 0x18, 0, 0, kt_rst_lomem, 1, 16 },
     { 0xE0, "LD", KT_HIMEM8_IND, 0, KT_REG, KT_A,
         kt_ld_himem8_ind_reg8, 2, 12 },
     { 0xE1, "POP", KT_REG, KT_HL, 0, 0, kt_pop_reg16, 1, 12 },
