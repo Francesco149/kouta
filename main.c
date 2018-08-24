@@ -3890,12 +3890,10 @@ int tile_pixel(int n, int x, int y)
     }
 
     if (x < 0 || x >= 8) {
-        log_dump("d", x);
         return 0;
     }
 
     if (y < 0 || y >= 8) {
-        log_dump("d", y);
         return 0;
     }
 
