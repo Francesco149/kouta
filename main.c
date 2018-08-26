@@ -2963,7 +2963,7 @@ kt_op_t kt_op_table[512] = {
     { 0xBA, "CP", KT_REG, KT_D, 0, 0, kt_cp_reg8, 1, 4 },
     { 0xBB, "CP", KT_REG, KT_E, 0, 0, kt_cp_reg8, 1, 4 },
     { 0xBC, "CP", KT_REG, KT_H, 0, 0, kt_cp_reg8, 1, 4 },
-    { 0xBD, "CP", KT_REG, KT_H, 0, 0, kt_cp_reg8, 1, 4 },
+    { 0xBD, "CP", KT_REG, KT_L, 0, 0, kt_cp_reg8, 1, 4 },
     { 0xBE, "CP", KT_REG_IND, KT_HL, 0, 0, kt_cp_hl_ind, 1, 8 },
     { 0xBF, "CP", KT_REG, KT_A, 0, 0, kt_cp_reg8, 1, 4 },
     { 0xC0, "RET NZ", 0, 0, 0, 0, kt_ret_nz, 1, 8 },
