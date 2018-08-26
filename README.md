@@ -7,7 +7,7 @@ games tested:
 * Super Mario Land -> playable
 * Kirby's Dream Land -> playable
 * Pokemon Yellow -> playable with some graphical glitches
-* Pokemon Red -> gets to the title screen and hangs, WIP
+* Pokemon Red/Blue -> playable with some graphical glitches
 
 ![](https://i.imgur.com/cuw3Z9O.gif)
 ![](https://i.imgur.com/zj0k5Ch.png)
