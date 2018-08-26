@@ -6,9 +6,11 @@ games tested:
 * The Legend of Zelda: Link's Awakening -> playable
 * Super Mario Land -> playable
 * Kirby's Dream Land -> playable
+* Pokemon Yellow -> playable with some graphical glitches
 * Pokemon Red -> gets to the title screen and hangs, WIP
 
 ![](https://i.imgur.com/cuw3Z9O.gif)
+![](https://i.imgur.com/zj0k5Ch.png)
 ![](https://i.imgur.com/TiNooIR.png)
 ![](https://i.imgur.com/TC5ViLl.png)
 ![](https://i.imgur.com/4Ou7fGI.png)
