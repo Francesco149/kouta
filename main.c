@@ -375,6 +375,7 @@ enum kouta_mode
 #define KT_MEM_ROM_ONLY 1
 #define KT_MEM_MBC1 2
 #define KT_MEM_MBC3 5
+#define KT_MEM_MBC5 7
 #define KT_MEM_HAS_RAM 0x80000000
 
 #define KT_LO 0x01
@@ -535,13 +536,14 @@ struct kouta
     int memory_model;
     int rom_bank;
     int ram_bank;
+    int max_ram_banks;
     int ram_enabled;
     int bank_mode;
 
     Uint8 vram[0x2000];
     Uint8 wram[0x2000];
     Uint8 hram[0x7F];
-    Uint8 ram[0x8000];
+    Uint8 ram[0x20000];
 
     int div_cycles;
     int tima_cycles;
@@ -739,7 +741,8 @@ int kt_load_rom(kouta_t* kt, char *path)
     case KT_MBC1:
     case KT_MBC1_RAM:
     case KT_MBC1_RAM_BATTERY:
-        kt->memory_model = KT_MEM_MBC3;
+        kt->memory_model = KT_MEM_MBC1;
+        kt->max_ram_banks = 4;
         break;
     case KT_MBC3_TIMER_BATTERY:
     case KT_MBC3_TIMER_RAM_BATTERY:
@@ -747,6 +750,16 @@ int kt_load_rom(kouta_t* kt, char *path)
     case KT_MBC3_RAM:
     case KT_MBC3_RAM_BATTERY:
         kt->memory_model = KT_MEM_MBC3;
+        kt->max_ram_banks = 4;
+        break;
+    case KT_MBC5:
+    case KT_MBC5_RAM:
+    case KT_MBC5_RAM_BATTERY:
+    case KT_MBC5_RUMBLE:
+    case KT_MBC5_RUMBLE_RAM:
+    case KT_MBC5_RUMBLE_RAM_BATTERY:
+        kt->memory_model = KT_MEM_MBC5;
+        kt->max_ram_banks = 8;
         break;
     default:
         log_puts("unimplemented memory model");
@@ -760,6 +773,10 @@ int kt_load_rom(kouta_t* kt, char *path)
     case KT_MBC3_TIMER_RAM_BATTERY:
     case KT_MBC3_RAM:
     case KT_MBC3_RAM_BATTERY:
+    case KT_MBC5_RAM:
+    case KT_MBC5_RAM_BATTERY:
+    case KT_MBC5_RUMBLE_RAM:
+    case KT_MBC5_RUMBLE_RAM_BATTERY:
         kt->memory_model |= KT_MEM_HAS_RAM;
         break;
     }
@@ -808,7 +825,7 @@ Uint8 kt_read(kouta_t* kt, int addr)
 
     else if (addr < 0xC000)
     {
-        if (kt->ram_bank < 4)
+        if (kt->ram_bank < kt->max_ram_banks)
         {
             if (!kt->ram_enabled) {
                 log_puts("tried to write disabled ram");
@@ -947,6 +964,7 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
         {
         case KT_MEM_MBC1:
         case KT_MEM_MBC3:
+        case KT_MEM_MBC5:
             if (addr < 0x2000)
             {
                 if ((value & 0x0F) == 0x0A) {
@@ -960,12 +978,30 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
             {
                 int low;
 
-                low = SDL_max(1, value);
+                low = value;
+
+                if (model != KT_MEM_MBC5) {
+                    low = SDL_max(1, low);
+                }
 
                 if (model == KT_MEM_MBC1) {
                     kt->rom_bank &= ~0x1F;
                     low &= 0x1F;
-                } else {
+                }
+
+                else if (model == KT_MEM_MBC5)
+                {
+                    if (addr < 0x3000) {
+                        kt->rom_bank &= 0x100;
+                        kt->rom_bank |= value;
+                    } else {
+                        kt->rom_bank &= 0xFF;
+                        kt->rom_bank |= (value & 1) << 8;
+                    }
+                }
+
+                else
+                {
                     kt->rom_bank &= ~0x7F;
                     low &= 0x7F;
                 }
@@ -977,17 +1013,23 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
             {
                 int high;
 
-                high = value & 3;
+                if (model == KT_MEM_MBC5) {
+                    high = value & 0x0F;
+                } else {
+                    high = value & 3;
+                }
 
                 if (kt->bank_mode) {
                     kt->ram_bank = high;
-                } else {
+                }
+
+                else if (model != KT_MEM_MBC5) {
                     kt->rom_bank &= 0x1F;
                     kt->rom_bank |= high;
                 }
             }
 
-            else if (model == KT_MEM_MBC1) {
+            else if (model == KT_MEM_MBC1 || model == KT_MEM_MBC5) {
                 kt->bank_mode = value & 1;
             } else {
                 /* TODO: latch clock */
@@ -1006,7 +1048,7 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
 
     else if (addr < 0xC000)
     {
-        if (kt->ram_bank < 4) {
+        if (kt->ram_bank < kt->max_ram_banks) {
             kt->ram[kt->ram_bank * 0x2000 + (addr & 0x1FFF)] = value;
             return;
         }
