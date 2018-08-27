@@ -3692,9 +3692,9 @@ skip_instruction:
 /* --------------------------------------------------------------------- */
 
 int r_display;
-int r_window_mode;
-int r_width;
-int r_height;
+int r_window_mode = 1;
+int r_width = 640;
+int r_height = 576;
 
 SDL_Window* r_window;
 SDL_Renderer* r_renderer;
@@ -3804,10 +3804,10 @@ void print_usage(char* argv0)
         "usage: %s [options] /path/to/rom.gb\n"
         "\n"
         "available options:\n"
-        "    -window: window mode | default: off | example: -window\n"
+        "    -fullscreen: default: off | example: -fullscreen\n"
         "    -d: main display index | default: 0 | example: -d 0\n"
-        "    -w: window width | default: 160 | example: -w 800\n"
-        "    -h: window height | default: 144 | example: -h 600\n"
+        "    -w: window width | default: 640 | example: -w 800\n"
+        "    -h: window height | default: 576 | example: -h 600\n"
         "    -classic: use classic color palette for dmg | -classic\n",
         argv0
     );
@@ -3823,8 +3823,8 @@ void parse_args(int argc, char* argv[])
 
     for (; argc > 0; ++argv, --argc)
     {
-        if (!strcmp(argv[0], "-window")) {
-            r_window_mode = 1;
+        if (!strcmp(argv[0], "-fullscreen")) {
+            r_window_mode = 0;
         }
 
         else if (!strcmp(argv[0], "-d") && argc >= 2) {
