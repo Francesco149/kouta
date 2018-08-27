@@ -11,6 +11,8 @@ games tested:
 * Little Sound DJ 4.8.6 -> seems to work but useless until audio
   is implemented
 * Aretha -> playable
+* Aretha II -> hangs at opening
+* Aretha III -> movement is unnaturally slow
 
 ![](https://i.imgur.com/cuw3Z9O.gif)
 ![](https://i.imgur.com/zj0k5Ch.png)
