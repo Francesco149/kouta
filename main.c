@@ -335,6 +335,8 @@ int kt_parse_cart(kt_cartidge_t* cart, Uint8* data, int data_len)
     case 0x01: cart->ram_len = 2000; break;
     case 0x02: cart->ram_len = 8000; break;
     case 0x03: cart->ram_len = 32000; break;
+    case 0x04: cart->ram_len = 128000; break;
+    case 0x05: cart->ram_len = 64000; break;
     default:
         log_print(log_line, "unknown ram len %02X", data[0x149]);
         return 0;
