@@ -8,6 +8,8 @@ games tested:
 * Kirby's Dream Land -> playable
 * Pokemon Yellow -> playable with some graphical glitches
 * Pokemon Red/Blue -> playable with some graphical glitches
+* Little Sound DJ 4.8.6 -> seems to work but useless until audio
+  is implemented
 
 ![](https://i.imgur.com/cuw3Z9O.gif)
 ![](https://i.imgur.com/zj0k5Ch.png)
