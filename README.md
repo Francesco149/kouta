@@ -10,12 +10,13 @@ games tested:
 * Pokemon Red/Blue -> playable with some graphical glitches
 * Little Sound DJ 4.8.6 -> seems to work but useless until audio
   is implemented
+* Aretha -> playable
 
 ![](https://i.imgur.com/cuw3Z9O.gif)
 ![](https://i.imgur.com/zj0k5Ch.png)
 ![](https://i.imgur.com/TiNooIR.png)
 ![](https://i.imgur.com/TC5ViLl.png)
-![](https://i.imgur.com/4Ou7fGI.png)
+![](https://i.imgur.com/TO0ZOS6.png)
 
 dependencies: SDL2
 
