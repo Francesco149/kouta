@@ -1023,7 +1023,7 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
                     high = value & 3;
                 }
 
-                if (kt->bank_mode) {
+                if (model == KT_MEM_MBC5 || kt->bank_mode) {
                     kt->ram_bank = high;
                 }
 
@@ -1033,7 +1033,7 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
                 }
             }
 
-            else if (model == KT_MEM_MBC1 || model == KT_MEM_MBC5) {
+            else if (model == KT_MEM_MBC1) {
                 kt->bank_mode = value & 1;
             } else {
                 /* TODO: latch clock */
