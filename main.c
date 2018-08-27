@@ -3858,7 +3858,7 @@ void parse_args(int argc, char* argv[])
     if (argc >= 1) {
         rom_file = argv[0];
     } else {
-        print_usage(argv[0]);
+        print_usage(argv0);
         exit(1);
     }
 
