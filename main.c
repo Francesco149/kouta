@@ -380,6 +380,7 @@ enum kouta_mode
 
 #define KT_MEM_ROM_ONLY 1
 #define KT_MEM_MBC1 2
+#define KT_MEM_MBC2 3
 #define KT_MEM_MBC3 5
 #define KT_MEM_MBC5 7
 #define KT_MEM_HAS_RAM 0x80000000
@@ -750,6 +751,11 @@ int kt_load_rom(kouta_t* kt, char *path)
         kt->memory_model = KT_MEM_MBC1;
         kt->max_ram_banks = 4;
         break;
+    case KT_MBC2:
+    case KT_MBC2_BATTERY:
+        kt->memory_model = KT_MEM_MBC2;
+        kt->max_ram_banks = 1;
+        break;
     case KT_MBC3_TIMER_BATTERY:
     case KT_MBC3_TIMER_RAM_BATTERY:
     case KT_MBC3:
@@ -969,6 +975,7 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
         switch (model)
         {
         case KT_MEM_MBC1:
+        case KT_MEM_MBC2:
         case KT_MEM_MBC3:
         case KT_MEM_MBC5:
             if (addr < 0x2000)
@@ -993,6 +1000,11 @@ void kt_write(kouta_t* kt, int addr, Uint8 value)
                 if (model == KT_MEM_MBC1) {
                     kt->rom_bank &= ~0x1F;
                     low &= 0x1F;
+                }
+
+                else if (model == KT_MEM_MBC2) {
+                    kt->rom_bank &= ~0x0F;
+                    low &= 0x0F;
                 }
 
                 else if (model == KT_MEM_MBC5)
